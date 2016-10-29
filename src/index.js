@@ -34,8 +34,7 @@ class Planet {
     this.position = new Point(0, 0, 0);
   }
 
-  update() {
-    push();
+  updatePosition() {
     // If this object has a parent, calculate its position.
     // Note : if it doesn't have one, it'll use the default 0, 0
     if (this.celestialParent != null) {
@@ -47,12 +46,15 @@ class Planet {
       this.position.x += this.celestialParent.position.x;
       this.position.y += this.celestialParent.position.y;
     }
+  }
+
+  updateDrawing() {
+    push();
     // Move and draw.
     translate(this.position.x, this.position.y);
     this.drawPlanet();
     pop();
   }
-
 }
 
 
@@ -163,16 +165,17 @@ class Star {
 
 // ====== PREFERENCES ======
 
-var followPlanet = true;
-var systemDensity = 2; // Per 100x100 pixels surface at origin depth
-var systemSkyDistance = 300;
-
 // Create system
 var star = new Planet(drawSun, getNoAngle, 100, 0, null);
 star.satellite = new Planet(drawEarth, getSecondsAngle, 30, 300, star);
 star.satellite.satellite = new Planet(drawMoon, getMillisAngle, 10, 70,
   star.satellite
 );
+
+var planetToFollow = star.satellite;
+var systemDensity = 2; // Per 100x100 pixels surface at origin depth
+var systemSkyDistance = 300;
+
 
 
 
@@ -217,16 +220,26 @@ draw = () => {
 
   background(20);
 
-  // Move our camera
-  if (followPlanet) {
-    scale(currentScale);
-    translate(-star.satellite.position.x, -star.satellite.position.y);
-  }
-
-  // Draw the planets
+  // Update the planets position.
+  // Do this before updating the camera, as the camera can follow planets.
+  // The offset between the camera and the planet can cause stutters
+  // when the framerate drops.
   let currentPlanet = star;
   while (currentPlanet) {
-    currentPlanet.update();
+    currentPlanet.updatePosition();
+    currentPlanet = currentPlanet.satellite;
+  }
+
+  // Move our camera
+  if (planetToFollow) {
+    scale(currentScale);
+    translate(-planetToFollow.position.x, -planetToFollow.position.y);
+  }
+
+  // We can now draw the planets
+  currentPlanet = star;
+  while (currentPlanet) {
+    currentPlanet.updateDrawing();
     currentPlanet = currentPlanet.satellite;
   }
 
