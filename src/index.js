@@ -12,7 +12,7 @@ class Point {
   constructor(x, y, z) {
     this.x = x;
     this.y = y;
-    this.z = z;
+    this.z = z ? z : 0;
   }
 }
 
@@ -32,13 +32,15 @@ class Planet {
   update() {
     push();
     if (this.celestialParent != null) {
-      translate(this.celestialParent.position.x, this.celestialParent.position.y, this.celestialParent.position.z);
+      // translate(this.celestialParent.position.x, this.celestialParent.position.y);
       // calculate current pos
       this.position.x = Math.sin(this.getAngle()) * this.orbitRadius;
       this.position.y = Math.cos(this.getAngle()) * this.orbitRadius;
       this.position.z = this.celestialParent.position.z;
+      this.position.x += this.celestialParent.position.x;
+      this.position.y += this.celestialParent.position.y;
     }
-    translate(this.position.x, this.position.y, this.position.y);
+    translate(this.position.x, this.position.y);
     this.drawPlanet();
     pop();
   }
@@ -117,15 +119,19 @@ star.satellite.satellite = new Planet(drawMoon, getMillisAngle, 10, 70, star.sat
 
 setup = () => {
   createCanvas(window.innerWidth, window.innerHeight, WEBGL);
+
+  var followPlanet = true;
 }
 
 draw = () => {
-  var d = new Date();
   //rotateX(frameCount * 0.003);
   //rotateY(frameCount * 0.004);
-  // box(d.getSeconds() + 1, d.getMinutes() + 1, d.getHours() + 1);
 
-  //background(255);
+  background(20);
+  if (followPlanet) {
+    scale(2);
+    translate(-star.satellite.position.x, -star.satellite.position.y);
+  }
 
   var dirY = (mouseY / height - 0.5) * 2;
   var dirX = (mouseX / width - 0.5) * 2;
