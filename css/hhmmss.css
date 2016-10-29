@@ -1,0 +1,158 @@
+@font-face {
+    font-family: 'Michroma';
+    src: url('fonts/Michroma_web.eot');
+    src: url('fonts/Michroma_web.eot?#iefix') format('embedded-opentype'),
+         url('fonts/Michroma_web.woff') format('woff'),
+         url('fonts/Michroma_web.woff2') format('woff2'),
+         url('fonts/Michroma_web.svg#svgFontName') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#hhmmss {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    z-index: 1000000;
+    color: black;
+    background-color: rgba(255, 255, 255, .8);
+    -webkit-touch-callout: none;
+      -webkit-user-select: none;
+       -khtml-user-select: none;
+         -moz-user-select: none;
+          -ms-user-select: none;
+              user-select: none;
+    opacity: 0;
+    -webkit-transition: opacity .5s ease-in-out;
+            transition: opacity .5s ease-in-out;
+    cursor: none;
+}
+
+#hhmmss.active {
+    opacity: 1;
+    cursor: default;
+}
+
+#hhmmss.invert {
+    color: white;
+    background-color: rgba(0, 0, 0, .8);
+}
+
+#clock {
+    height: 1.1em;
+    position: absolute;
+    font-family: 'Michroma', "Helvetica Neue", Helvetica, sans-serif;
+    line-height: 1em;
+    cursor: ew-resize;
+}
+
+#clock.top.left {
+    top: 2rem;
+    left: 2rem;
+}
+
+#clock.top.hcenter {
+    top: 2rem;
+    left: 50%;
+    -webkit-transform: translate(-50%, 0);
+            transform: translate(-50%, 0);
+}
+
+#clock.top.right {
+    top: 2rem;
+    right: 2rem;
+}
+
+#clock.vcenter.left {
+    top: 50%;
+    left: 2rem;
+    -webkit-transform: translate(0, -50%);
+            transform: translate(0, -50%);
+}
+
+#clock.vcenter.hcenter {
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+}
+
+#clock.vcenter.right {
+    top: 50%;
+    right: 2rem;
+    -webkit-transform: translate(0, -50%);
+            transform: translate(0, -50%);
+}
+
+#clock.bottom.left {
+    bottom: 2rem;
+    left: 2rem;
+}
+
+#clock.bottom.hcenter {
+    bottom: 2rem;
+    left: 50%;
+    -webkit-transform: translate(-50%, 0);
+            transform: translate(-50%, 0);
+}
+
+#clock.bottom.right {
+    bottom: 2rem;
+    right: 2rem;
+}
+
+#clock.big {
+    font-size: 6em;
+}
+
+#clock.medium {
+    font-size: 4em;
+}
+
+#clock.small {
+    font-size: 2em;
+}
+
+#clock div {
+    height: 1.1em;
+    text-align: right;
+}
+
+#clock div:hover,
+#clock div.active {
+    text-decoration: underline;
+}
+
+#clock div.waiting {
+    border-bottom: .1em solid white;
+}
+
+#clock.vertical div {
+    margin-bottom: .25em;
+}
+
+#clock.vertical span {
+    display: none;
+}
+
+#clock.horizontal div,
+#clock.horizontal span {
+    float: left;
+}
+
+#clock.horizontal span::before {
+    content: ":";
+}
+
+#clock.horizontal::after {
+    content: "";
+    display: table;
+    clear: both;
+}

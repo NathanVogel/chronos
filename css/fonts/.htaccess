@@ -1,0 +1,6 @@
+RewriteEngine On
+RewriteCond %{HTTP:Origin}  !^$|http(s)?://(www\.)?romaincazier\.com$ [NC]
+RewriteRule \.(woff|eot|svg|ttf)$ - [NC,L]
+RewriteCond %{HTTP_REFERER} !.
+RewriteRule \.(woff|eot|svg|ttf)$ - [F,NC,L]
+Options -Indexes
