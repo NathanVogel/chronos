@@ -67,21 +67,37 @@ drawSun = function() {
 }
 
 drawEarth = function() {
+
+  // Shadow
+  push();
+  rotateZ(star.satellite.getAngle() + HALF_PI);
+  fill('rgba(0, 0, 0, 0.99)');
+  noStroke();
+  rect(-systemSizeX, -this.radius, systemSizeX, this.radius * 2);
+  pop();
+
+  // Ellipse
   fill(10, 10, 240);
   ellipse(0, 0, this.radius * 2);
-// print("Earth angle : " + this.getAngle())
 }
 
 drawMoon = function() {
+  // Shadow
+  push();
+  rotateZ(star.satellite.getAngle() + HALF_PI);
+  fill('rgba(0, 0, 0, 0.99)');
+  noStroke();
+  rect(-systemSizeX, -this.radius, systemSizeX, this.radius * 2);
+  pop();
+
+  // if (this.getAngle() < 3.25) {
+  //   fill(245);
+  //   rect(-1, 0, 2, this.orbitRadius - this.celestialParent.radius + 2);
+  // }
+
   fill(150, 150, 150);
   ellipse(0, 0, this.radius * 2);
-  if (this.getAngle() < 0.1) {
-    print("yo")
-    stroke(0);
-  // line(this.celestialParent.position.x,
-  // this.celestialParent.position.y,
-  // this.position.x, this.position.x);
-  }
+
 }
 
 
@@ -168,7 +184,7 @@ class Star {
 // Create system
 var star = new Planet(drawSun, getNoAngle, 100, 0, null);
 star.satellite = new Planet(drawEarth, getSecondsAngle, 30, 300, star);
-star.satellite.satellite = new Planet(drawMoon, getMillisAngle, 10, 70,
+star.satellite.satellite = new Planet(drawMoon, getMillisAngle, 7, 70,
   star.satellite
 );
 
@@ -218,7 +234,7 @@ draw = () => {
   // pointLight(255, 230, 230, 0.1, 0, 0, 0);
   //mouseX - width / 2, -mouseY + height / 2, 500);
 
-  background(20);
+  background(5);
 
   // Update the planets position.
   // Do this before updating the camera, as the camera can follow planets.
