@@ -199,7 +199,7 @@ star.satellite.satellite.satellite = new Planet(drawMoon, getMillisAngle, 1, 9,
 );
 
 var planetToFollow = star.satellite;
-var systemDensity = 3; // Per 100x100 pixels surface at origin depth
+var systemDensity = 1; // Per 100x100 pixels surface at origin depth
 var systemSkyDistance = 100;
 
 
@@ -215,9 +215,9 @@ var systemSizeX = maxSystemSpan * 5;
 var systemSizeY = systemSizeX;
 var systemStarCount = (systemSizeX * systemSizeY / (100 * 100)) * systemDensity;
 print("Star count : " + systemStarCount);
-if (systemStarCount > 700) {
-  systemStarCount = 700;
-}
+// if (systemStarCount > 500) {
+//   systemStarCount = 500;
+// }
 
 setup = () => {
   createCanvas(window.innerWidth, window.innerHeight, WEBGL);
@@ -244,7 +244,7 @@ draw = () => {
   // pointLight(255, 230, 230, 0.1, 0, 0, 0);
   //mouseX - width / 2, -mouseY + height / 2, 500);
 
-  background(8);
+  background(5);
 
   // Update the planets position.
   // Do this before updating the camera, as the camera can follow planets.
@@ -273,6 +273,24 @@ draw = () => {
   for (let i = 0; i < stars.length; i++) {
     stars[i].update();
   }
+}
+
+var zoomStep = 1.3;
+mouseWheel = (event) => {
+  if (event.delta > 0) {
+    currentScale /= zoomStep;
+  }
+  else {
+    currentScale *= zoomStep;
+  }
+}
 
 
+mouseClicked = () => {
+  if (planetToFollow.satellite) {
+    planetToFollow = planetToFollow.satellite;
+  }
+  else {
+    planetToFollow = star;
+  }
 }
