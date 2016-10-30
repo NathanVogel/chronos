@@ -83,12 +83,12 @@ drawEarth = function() {
 
 drawMoon = function() {
   // Shadow
-  push();
-  rotateZ(star.satellite.getAngle() + HALF_PI);
-  fill('rgba(0, 0, 0, 0.99)');
-  noStroke();
-  rect(-systemSizeX, -this.radius, systemSizeX, this.radius * 2);
-  pop();
+  // push();
+  // rotateZ(star.satellite.getAngle() + HALF_PI);
+  // fill('rgba(0, 0, 0, 0.99)');
+  // noStroke();
+  // rect(-systemSizeX, -this.radius, systemSizeX, this.radius * 2);
+  // pop();
 
   // if (this.getAngle() < 3.25) {
   //   fill(245);
@@ -182,15 +182,25 @@ class Star {
 // ====== PREFERENCES ======
 
 // Create system
-var star = new Planet(drawSun, getNoAngle, 100, 0, null);
-star.satellite = new Planet(drawEarth, getSecondsAngle, 30, 300, star);
-star.satellite.satellite = new Planet(drawMoon, getMillisAngle, 7, 70,
+// var star = new Planet(drawSun, getNoAngle, 100, 0, null);
+// star.satellite = new Planet(drawEarth, getSecondsAngle, 30, 300, star);
+// star.satellite.satellite = new Planet(drawMoon, getMillisAngle, 7, 70,
+//   star.satellite
+// );
+
+
+var star = new Planet(drawSun, getNoAngle, 120, 0, null);
+star.satellite = new Planet(drawEarth, getMinutesAngle, 15, 400, star);
+star.satellite.satellite = new Planet(drawMoon, getSecondsAngle, 5, 50,
   star.satellite
+);
+star.satellite.satellite.satellite = new Planet(drawMoon, getMillisAngle, 1, 9,
+  star.satellite.satellite
 );
 
 var planetToFollow = star.satellite;
-var systemDensity = 2; // Per 100x100 pixels surface at origin depth
-var systemSkyDistance = 300;
+var systemDensity = 3; // Per 100x100 pixels surface at origin depth
+var systemSkyDistance = 100;
 
 
 
@@ -199,14 +209,14 @@ var systemSkyDistance = 300;
 // ====== SETUP ======
 
 var stars = [];
-var currentScale = 2;
+var currentScale = 3;
 var maxSystemSpan = getSystemSpan(star);
-var systemSizeX = maxSystemSpan * 5 * systemSkyDistance / 300;
+var systemSizeX = maxSystemSpan * 5;
 var systemSizeY = systemSizeX;
 var systemStarCount = (systemSizeX * systemSizeY / (100 * 100)) * systemDensity;
 print("Star count : " + systemStarCount);
-if (systemStarCount > 1000) {
-  systemStarCount = 1000;
+if (systemStarCount > 700) {
+  systemStarCount = 700;
 }
 
 setup = () => {
@@ -234,7 +244,7 @@ draw = () => {
   // pointLight(255, 230, 230, 0.1, 0, 0, 0);
   //mouseX - width / 2, -mouseY + height / 2, 500);
 
-  background(5);
+  background(8);
 
   // Update the planets position.
   // Do this before updating the camera, as the camera can follow planets.
