@@ -12,6 +12,16 @@ print = (str) => {
   console.log(str);
 }
 
+
+var img_jupiter, img_sun;
+function preload() {
+  //img_jupiter = loadImage("img/jupiter-transparent.png");
+  img_jupiter = loadImage("img/marsmap1k.jpg");
+  img_sun = loadImage("img/2k_sun.jpg");
+}
+
+
+
 class Point {
   constructor(x, y, z) {
     this.x = x;
@@ -106,6 +116,14 @@ draw3DSun = function() {
   sphere(this.radius, 600);
 }
 
+draw3DSun1 = function() {
+    texture(img_sun);
+    push();
+    rotateY(PI+frameCount*0.0002);
+    sphere(this.radius, 300);
+    pop();
+}
+
 draw3DEarth = function() {
   ambientMaterial(10, 50, 230);
   sphere(this.radius, 100);
@@ -114,6 +132,14 @@ draw3DEarth = function() {
 draw3DMoon = function() {
   ambientMaterial(180, 180, 180);
   sphere(this.radius, 100);
+}
+
+draw3DMars = function() {
+  texture(img_jupiter);//-img_jupiter.width/2, -img_jupiter.height/2);
+  push();
+  rotateY(PI+frameCount*0.002);
+  sphere(this.radius);
+  pop();
 }
 
 
@@ -189,12 +215,12 @@ class Star {
 // );
 
 
-var star = new Planet(drawSun, getNoAngle, 120, 0, null);
-star.satellite = new Planet(drawEarth, getMinutesAngle, 15, 400, star);
-star.satellite.satellite = new Planet(drawMoon, getSecondsAngle, 5, 50,
+var star = new Planet(draw3DSun1, getNoAngle, 100, 0, null);
+star.satellite = new Planet(draw3DMars, getMinutesAngle, 15, 280, star);
+star.satellite.satellite = new Planet(draw3DMoon, getSecondsAngle, 5, 50,
   star.satellite
 );
-star.satellite.satellite.satellite = new Planet(drawMoon, getMillisAngle, 1, 9,
+star.satellite.satellite.satellite = new Planet(draw3DMoon, getMillisAngle, 1, 9,
   star.satellite.satellite
 );
 
@@ -221,6 +247,9 @@ print("Star count : " + systemStarCount);
 
 setup = () => {
   createCanvas(window.innerWidth, window.innerHeight, WEBGL);
+
+  imageMode(CENTER);
+
   for (let i = 0; i < systemStarCount; i++) {
     stars.push(new Star(
       Math.random() * systemSizeX - systemSizeX / 2,
@@ -236,15 +265,25 @@ setup = () => {
 // ====== DRAW ======
 // Draw every frame
 draw = () => {
+  background(5);
+
+
   // Some 3D stuff
   // rotateX(frameCount * 0.001);
   // rotateY(frameCount * 0.0007);
-  // var dirY = (mouseY / height - 0.5) * 2;
-  // var dirX = (mouseX / width - 0.5) * 2;
-  // pointLight(255, 230, 230, 0.1, 0, 0, 0);
   //mouseX - width / 2, -mouseY + height / 2, 500);
 
-  background(5);
+ ambientLight(100, 80, 90, 0.02);
+
+  pointLight(255, 230, 230, 1, 110, 110, 1030/currentScale);
+  //   pointLight(255, 230, 230, 1, 110, 110, -1030/currentScale);
+  //     pointLight(255, 230, 230, 1, -110, -110, 1030/currentScale);
+  //       pointLight(255, 230, 230, 1, -110, -110, -1030/currentScale);
+
+  //pointLight(255, 230, 230, 0.3, -110, 0, -1);
+  //pointLight(255, 230, 230, 0.3, 110, 0, -1);
+  //pointLight(255, 230, 230, 0.3, 0, -110, -1);
+  //pointLight(255, 230, 230, 0.3, 0, 110, -1);
 
   // Update the planets position.
   // Do this before updating the camera, as the camera can follow planets.
