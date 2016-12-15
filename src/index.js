@@ -13,7 +13,8 @@ print = (str) => {
 }
 
 
-var img_jupiter, img_sun;
+var img_jupiter,
+  img_sun;
 function preload() {
   //img_jupiter = loadImage("img/jupiter-transparent.png");
   img_jupiter = loadImage("img/marsmap1k.jpg");
@@ -80,7 +81,7 @@ drawEarth = function() {
 
   // Shadow
   push();
-  rotateZ(star.satellite.getAngle() + HALF_PI);
+  rotate(star.satellite.getAngle() + HALF_PI);
   fill('rgba(0, 0, 0, 0.99)');
   noStroke();
   rect(-systemSizeX, -this.radius, systemSizeX, this.radius * 2);
@@ -108,38 +109,6 @@ drawMoon = function() {
   fill(150, 150, 150);
   ellipse(0, 0, this.radius * 2);
 
-}
-
-
-draw3DSun = function() {
-  ambientMaterial(220, 200, 0);
-  sphere(this.radius, 600);
-}
-
-draw3DSun1 = function() {
-    texture(img_sun);
-    push();
-    rotateY(PI+frameCount*0.0002);
-    sphere(this.radius, 300);
-    pop();
-}
-
-draw3DEarth = function() {
-  ambientMaterial(10, 50, 230);
-  sphere(this.radius, 100);
-}
-
-draw3DMoon = function() {
-  ambientMaterial(180, 180, 180);
-  sphere(this.radius, 100);
-}
-
-draw3DMars = function() {
-  texture(img_jupiter);//-img_jupiter.width/2, -img_jupiter.height/2);
-  push();
-  rotateY(PI+frameCount*0.002);
-  sphere(this.radius);
-  pop();
 }
 
 
@@ -195,10 +164,10 @@ class Star {
   }
 
   update() {
-    strokeWeight(this.intensity);
-    stroke(255);
+    //strokeWeight(this.intensity);
+    fill(255);
     push();
-    translate(this.x, this.y, this.z);
+    translate(this.x, this.y);
     ellipse(0, 0, this.intensity);
     pop();
   }
@@ -214,13 +183,13 @@ class Star {
 //   star.satellite
 // );
 
-
-var star = new Planet(draw3DSun1, getNoAngle, 100, 0, null);
-star.satellite = new Planet(draw3DMars, getMinutesAngle, 15, 280, star);
-star.satellite.satellite = new Planet(draw3DMoon, getSecondsAngle, 5, 50,
+// Note : better to stay at small size, not sure why anymore
+var star = new Planet(drawSun, getNoAngle, 100, 0, null);
+star.satellite = new Planet(drawEarth, getMinutesAngle, 40, 240, star);
+star.satellite.satellite = new Planet(drawMoon, getSecondsAngle, 20, 100,
   star.satellite
 );
-star.satellite.satellite.satellite = new Planet(draw3DMoon, getMillisAngle, 1, 9,
+star.satellite.satellite.satellite = new Planet(drawMoon, getMillisAngle, 2, 25,
   star.satellite.satellite
 );
 
@@ -241,14 +210,17 @@ var systemSizeX = maxSystemSpan * 5;
 var systemSizeY = systemSizeX;
 var systemStarCount = (systemSizeX * systemSizeY / (100 * 100)) * systemDensity;
 print("Star count : " + systemStarCount);
-// if (systemStarCount > 500) {
-//   systemStarCount = 500;
-// }
+if (systemStarCount > 500) {
+  systemStarCount = 500;
+}
 
 setup = () => {
-  createCanvas(window.innerWidth, window.innerHeight, WEBGL);
+  createCanvas(window.innerWidth, window.innerHeight);
 
   imageMode(CENTER);
+  rectMode(CENTER);
+  ellipseMode(CENTER);
+  noStroke();
 
   for (let i = 0; i < systemStarCount; i++) {
     stars.push(new Star(
@@ -268,22 +240,6 @@ draw = () => {
   background(5);
 
 
-  // Some 3D stuff
-  // rotateX(frameCount * 0.001);
-  // rotateY(frameCount * 0.0007);
-  //mouseX - width / 2, -mouseY + height / 2, 500);
-
- ambientLight(100, 80, 90, 0.02);
-
-  pointLight(255, 230, 230, 1, 110, 110, 1030/currentScale);
-  //   pointLight(255, 230, 230, 1, 110, 110, -1030/currentScale);
-  //     pointLight(255, 230, 230, 1, -110, -110, 1030/currentScale);
-  //       pointLight(255, 230, 230, 1, -110, -110, -1030/currentScale);
-
-  //pointLight(255, 230, 230, 0.3, -110, 0, -1);
-  //pointLight(255, 230, 230, 0.3, 110, 0, -1);
-  //pointLight(255, 230, 230, 0.3, 0, -110, -1);
-  //pointLight(255, 230, 230, 0.3, 0, 110, -1);
 
   // Update the planets position.
   // Do this before updating the camera, as the camera can follow planets.
@@ -297,8 +253,18 @@ draw = () => {
 
   // Move our camera
   if (planetToFollow) {
-    scale(currentScale);
-    translate(-planetToFollow.position.x, -planetToFollow.position.y);
+    camera.zoom = currentScale;
+    camera.position.x = planetToFollow.position.x;
+    camera.position.y = planetToFollow.position.y;
+  // scale(currentScale);
+  // translate(
+  //   currentScale * -planetToFollow.position.x, // + width / 2,
+  //   currentScale * -planetToFollow.position.y); // + height / 2);
+  }
+
+  // Draw the sky
+  for (let i = 0; i < stars.length; i++) {
+    stars[i].update();
   }
 
   // We can now draw the planets
@@ -307,17 +273,13 @@ draw = () => {
     currentPlanet.updateDrawing();
     currentPlanet = currentPlanet.satellite;
   }
-
-  // Draw the sky
-  for (let i = 0; i < stars.length; i++) {
-    stars[i].update();
-  }
 }
+
 
 var zoomStep = 1.03;
 mouseWheel = (event) => {
   //print(event.delta);
-  print(currentScale);
+  //print(currentScale);
   if (event.delta > 0 && currentScale > 0.1) {
     currentScale /= (zoomStep + event.delta / 100);
   } else if (event.delta < 0 && currentScale < 100) {
