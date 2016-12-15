@@ -14,11 +14,17 @@ print = (str) => {
 
 
 var img_jupiter,
-  img_sun;
+  img_sun,
+  img_mars,
+  img_moon,
+  img_shadow;
+
 function preload() {
-  //img_jupiter = loadImage("img/jupiter-transparent.png");
-  img_jupiter = loadImage("img/marsmap1k.jpg");
-  img_sun = loadImage("img/2k_sun.jpg");
+  img_jupiter = loadImage("img/jupiter-transparent.png");
+  img_moon = loadImage("img/moon.png");
+  img_shadow = loadImage("img/shadow.png");
+  // img_mars = loadImage("img/marsmap1k.jpg");
+  img_sun = loadImage("img/sun.png");
 }
 
 
@@ -74,41 +80,55 @@ class Planet {
 
 drawSun = function() {
   fill(240, 240, 0);
-  ellipse(0, 0, this.radius * 2, this.radius * 2, 70);
+  //ellipse(0, 0, this.radius * 2, this.radius * 2, 70);
+  imageMode(CENTER);
+  image(img_sun, 0, 0, this.radius * 2, this.radius * 2);
 }
 
 drawEarth = function() {
 
-  // Shadow
-  push();
-  rotate(star.satellite.getAngle() + HALF_PI);
-  fill('rgba(0, 0, 0, 0.99)');
-  noStroke();
-  rect(-systemSizeX, -this.radius, systemSizeX, this.radius * 2);
-  pop();
+  drawProjectedshadow(this.radius, angleToStar(this));
 
-  // Ellipse
-  fill(10, 10, 240);
-  ellipse(0, 0, this.radius * 2);
+  image(img_jupiter, 0, 0, this.radius * 2, this.radius * 2);
+  drawOvershadow(this.radius, angleToStar(this)); //star.satellite.getAngle());
+// fill(10, 100, 240);
+//ellipse(0, 0, this.radius * 2);
 }
 
+
 drawMoon = function() {
-  // Shadow
-  // push();
-  // rotateZ(star.satellite.getAngle() + HALF_PI);
-  // fill('rgba(0, 0, 0, 0.99)');
-  // noStroke();
-  // rect(-systemSizeX, -this.radius, systemSizeX, this.radius * 2);
-  // pop();
 
-  // if (this.getAngle() < 3.25) {
-  //   fill(245);
-  //   rect(-1, 0, 2, this.orbitRadius - this.celestialParent.radius + 2);
-  // }
+  drawProjectedshadow(this.radius, angleToStar(this));
 
+  image(img_moon, 0, 0, this.radius * 2, this.radius * 2);
+  drawOvershadow(this.radius, angleToStar(this));
+//fill(150, 150, 150);
+//ellipse(0, 0, this.radius * 2);
+}
+
+
+drawSatellite = function() {
   fill(150, 150, 150);
-  ellipse(0, 0, this.radius * 2);
+  rectMode(CENTER);
+  rect(0, 0, this.radius, this.radius);
+}
 
+
+drawOvershadow = function(radius, angle) {
+  push();
+  rotate(angle);
+  image(img_shadow, 0, 0, radius * 2 + 0.5, radius * 2 + 0.5);
+  pop();
+}
+
+drawProjectedshadow = function(radius, angle) {
+  push();
+  rotate(angle);
+  fill('rgba(0, 0, 0, 0.3)');
+  noStroke();
+  rectMode(CORNER);
+  rect(-systemSizeX, -radius, systemSizeX, radius * 2);
+  pop();
 }
 
 
@@ -138,6 +158,13 @@ getMinutesAngle = () => {
   a += PI;
   return a;
 }
+
+// Returns the angle that the shadow must be rotated to.
+angleToStar = function(planet) {
+  var a = atan2(star.position.x - planet.position.x, star.position.y - planet.position.y);
+  return -a + HALF_PI;
+}
+
 
 // Calculate the maximum size of the system
 
@@ -183,13 +210,11 @@ class Star {
 //   star.satellite
 // );
 
-// Note : better to stay at small size, not sure why anymore
+// Note : better to stay at small size, not sure why anymore (only in 3D ?)
 var star = new Planet(drawSun, getNoAngle, 100, 0, null);
 star.satellite = new Planet(drawEarth, getMinutesAngle, 40, 240, star);
-star.satellite.satellite = new Planet(drawMoon, getSecondsAngle, 20, 100,
-  star.satellite
-);
-star.satellite.satellite.satellite = new Planet(drawMoon, getMillisAngle, 2, 25,
+star.satellite.satellite = new Planet(drawMoon, getSecondsAngle, 20, 100, star.satellite);
+star.satellite.satellite.satellite = new Planet(drawSatellite, getMillisAngle, 2, 25,
   star.satellite.satellite
 );
 
@@ -237,7 +262,7 @@ setup = () => {
 // ====== DRAW ======
 // Draw every frame
 draw = () => {
-  background(5);
+  background(10);
 
 
 
