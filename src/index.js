@@ -314,22 +314,23 @@ draw = () => {
   }
 }
 
-var zoomStep = 1.3;
+var zoomStep = 1.03;
 mouseWheel = (event) => {
-  if (event.delta > 0) {
-    currentScale /= zoomStep;
+  //print(event.delta);
+  print(currentScale);
+  if (event.delta > 0 && currentScale > 0.1) {
+    currentScale /= (zoomStep + event.delta / 100);
+  } else if (event.delta < 0 && currentScale < 100) {
+    currentScale *= (zoomStep - event.delta / 100);
   }
-  else {
-    currentScale *= zoomStep;
-  }
+  return false;
 }
 
 
 mouseClicked = () => {
   if (planetToFollow.satellite) {
     planetToFollow = planetToFollow.satellite;
-  }
-  else {
+  } else {
     planetToFollow = star;
   }
 }
