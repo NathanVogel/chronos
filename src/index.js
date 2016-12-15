@@ -211,8 +211,8 @@ class Star {
 // );
 
 // Note : better to stay at small size, not sure why anymore (only in 3D ?)
-var star = new Planet(drawSun, getNoAngle, 100, 0, null);
-star.satellite = new Planet(drawEarth, getMinutesAngle, 40, 240, star);
+var star = new Planet(drawSun, getNoAngle, 200, 0, null);
+star.satellite = new Planet(drawEarth, getMinutesAngle, 40, 440, star);
 star.satellite.satellite = new Planet(drawMoon, getSecondsAngle, 20, 100, star.satellite);
 star.satellite.satellite.satellite = new Planet(drawSatellite, getMillisAngle, 2, 25,
   star.satellite.satellite
