@@ -62,10 +62,16 @@ function setup() {
   // );
 
 
-  star = new Planet(drawSun, getNoAngle, 100, 0, null);
-  star.satellite = new Planet(drawPlanet, getMinutesAngle, 40, 240, star);
-  star.satellite.satellite = new Planet(drawMoon, getSecondsAngle, 20, 100, star.satellite);
-  star.satellite.satellite.satellite = new Planet(drawSatellite, getMillisAngle, 2, 25,
+  let starRadius = 60 + Math.random() * 200;
+  let planetRadius = 30 + Math.random() * 50;
+  let planetDistance = 2 * starRadius + planetRadius + Math.random() *200;
+  let moonRadius = 10 + Math.random() * 20;
+  let moonDistance = 2 * planetRadius + moonRadius + Math.random() * 80;
+  let satelliteDistance = moonRadius + 5 + Math.random() * 20
+  star = new Planet(drawSun, getNoAngle, starRadius, 0, null);
+  star.satellite = new Planet(drawPlanet, getMinutesAngle, planetRadius, planetDistance, star);
+  star.satellite.satellite = new Planet(drawMoon, getSecondsAngle, moonRadius, moonDistance, star.satellite);
+  star.satellite.satellite.satellite = new Planet(drawSatellite, getMillisAngle, 2, satelliteDistance,
     star.satellite.satellite
   );
 
@@ -87,10 +93,6 @@ function setup() {
 
 
   // ====== SETUP ======
-
-
-
-
 
   imageMode(CENTER);
   rectMode(CENTER);
@@ -131,9 +133,15 @@ class Planet {
 
     // Set a default position for the star. Which is always the center of
     this.position = new Point(0, 0, 0);
-    this.imageRotation = 0.0;
+    this.imageRotation = Math.random()*180;
+    this.imageRotationSpeed = 0.000001 + Math.random() * 0.000002;
     this.colors = [getRandomColor(), getRandomColor()];
-    //if (Math.random()
+    while (Math.random() < 0.8) {
+      // Either generate a new color, or picks one that already exists
+      this.colors.push(Math.random() < 0.5 ?
+        getRandomColor()
+      : this.colors[Math.floor(Math.random() * this.colors.length)]);
+    }
   }
 
   updatePosition() {
@@ -275,20 +283,32 @@ drawSun = function() {
 
 let density = 0.003;
 
+let logged = false;
 drawPlanet = function() {
 
   drawProjectedshadow(this.radius, angleToStar(this));
 
-  strokeWeight(2);
+  strokeWeight(1);
   strokeCap(SQUARE);
-  for(let i = -1; i <= 1; i += density) {
+  // TODO : this should be calculated once, outputed to a Graphics or img
+  // maybe even calculate a mask at the end
+  for(let i = -1+density; i < 1; i += density) {
     //stroke((i+1) * 50, 50, 100);
-    stroke(lerpColor(this.colors[0], this.colors[1], (i+1)/2));
+    let percent = (i+1) / 2;
+    let c = floor(percent * (this.colors.length - 1));
+    let lerped = lerpColor(this.colors[c], this.colors[c + 1], (percent * (this.colors.length - 1)) % 1);
+
+    // for (let j = 0; j < lerped.levels.length; j++) {
+    //   //lerped.levels[j] -= noise(lerped.levels[j]) * 10;
+    //     lerped._array[j] -= noise(lerped.levels[0]+percent*50)/255*350;
+    // }
+    logged = true;
+    stroke(lerped);
     let angle = acos(i);
     // Something weird is wrong here, the circle isn't perfect.
     // It's slightly an ellipse, I don't know why.
     // Adding one at the max of the the smaller axis fixes this...
-    let r = (this.radius + (1-abs(i))) - 1; // -1 to correct the global size.
+    let r = this.radius;// (this.radius + (1-abs(i))) - 1;
     // Draw each line to fill our circle
     line(
       cos(this.imageRotation+angle) * r,
@@ -296,16 +316,8 @@ drawPlanet = function() {
       cos(this.imageRotation-angle) * r,
       sin(this.imageRotation-angle) * r);
     // Make our gradient turn.
-    this.imageRotation += 0.000003;
+    this.imageRotation += this.imageRotationSpeed;
   }
-
-  // fill(10, 100, 240);
-
-  // Quick code to visually check if the ellipse is a perfect circle
-  // stroke(255);
-  // noFill();
-  // strokeWeight(0.2);
-  // ellipse(0, 0, this.radius * 2 + 3);
 
   // Draw an atmosphere
   // noFill();
@@ -323,6 +335,12 @@ drawPlanet = function() {
   // }
 
   drawOvershadow(this.radius, angleToStar(this));
+    // Quick code to visually check if the ellipse is a perfect circle
+    stroke(255);
+    noFill();
+    strokeWeight(0.2);
+    ellipse(0, 0, this.radius * 2);
+
 }
 
 
