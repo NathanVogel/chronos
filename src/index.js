@@ -484,13 +484,9 @@ draw = () => {
   // Move our camera
   if (planetToFollow) {
     camera.zoom = currentScale;
-    //console.log(camera.position.x);
-    camera.position.x = planetToFollow.position.x + cameraOffset.thex;
-    camera.position.y = planetToFollow.position.y + cameraOffset.they;
-  // scale(currentScale);
-  // translate(
-  //   currentScale * -planetToFollow.position.x, // + width / 2,
-  //   currentScale * -planetToFollow.position.y); // + height / 2);
+    camera.position.x = planetToFollow.position.x + Number(cameraOffset.x);
+    camera.position.y = planetToFollow.position.y + Number(cameraOffset.y);
+  // For some reason the camera offset is converted to a string by anime.js
   }
 
   // Draw the sky

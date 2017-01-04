@@ -1,5 +1,5 @@
 /*
- * Anime v1.1.2
+ * Anime v1.1.3
  * http://anime-js.com
  * JavaScript animation engine
  * Copyright (c) 2016 Julian Garnier
@@ -7,7 +7,7 @@
  * Released under the MIT license
  */
 
-(function (root, factory) {
+(function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
     define([], factory);
@@ -20,9 +20,9 @@
     // Browser globals (root is window)
     root.anime = factory();
   }
-}(this, function () {
+}(this, function() {
 
-  var version = '1.1.2';
+  var version = '1.1.3';
 
   // Defaults
 
@@ -43,24 +43,51 @@
   // Transforms
 
   var validTransforms = ['translateX', 'translateY', 'translateZ', 'rotate', 'rotateX', 'rotateY', 'rotateZ', 'scale', 'scaleX', 'scaleY', 'scaleZ', 'skewX', 'skewY'];
-  var transform, transformStr = 'transform';
+  var transform,
+    transformStr = 'transform';
 
   // Utils
 
   var is = {
-    arr: function(a) { return Array.isArray(a) },
-    obj: function(a) { return Object.prototype.toString.call(a).indexOf('Object') > -1 },
-    svg: function(a) { return a instanceof SVGElement },
-    dom: function(a) { return a.nodeType || is.svg(a) },
-    num: function(a) { return !isNaN(parseInt(a)) },
-    str: function(a) { return typeof a === 'string' },
-    fnc: function(a) { return typeof a === 'function' },
-    und: function(a) { return typeof a === 'undefined' },
-    nul: function(a) { return typeof a === 'null' },
-    hex: function(a) { return /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(a) },
-    rgb: function(a) { return /^rgb/.test(a) },
-    hsl: function(a) { return /^hsl/.test(a) },
-    col: function(a) { return (is.hex(a) || is.rgb(a) || is.hsl(a)) }
+    arr: function(a) {
+      return Array.isArray(a)
+    },
+    obj: function(a) {
+      return Object.prototype.toString.call(a).indexOf('Object') > -1
+    },
+    svg: function(a) {
+      return a instanceof SVGElement
+    },
+    dom: function(a) {
+      return a.nodeType || is.svg(a)
+    },
+    num: function(a) {
+      return !isNaN(parseInt(a))
+    },
+    str: function(a) {
+      return typeof a === 'string'
+    },
+    fnc: function(a) {
+      return typeof a === 'function'
+    },
+    und: function(a) {
+      return typeof a === 'undefined'
+    },
+    nul: function(a) {
+      return typeof a === 'null'
+    },
+    hex: function(a) {
+      return /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(a)
+    },
+    rgb: function(a) {
+      return /^rgb/.test(a)
+    },
+    hsl: function(a) {
+      return /^hsl/.test(a)
+    },
+    col: function(a) {
+      return (is.hex(a) || is.rgb(a) || is.hsl(a))
+    }
   }
 
   // Easings functions adapted from http://jqueryui.com/
@@ -69,33 +96,52 @@
     var eases = {};
     var names = ['Quad', 'Cubic', 'Quart', 'Quint', 'Expo'];
     var functions = {
-      Sine: function(t) { return 1 - Math.cos( t * Math.PI / 2 ); },
-      Circ: function(t) { return 1 - Math.sqrt( 1 - t * t ); },
-      Elastic: function(t, m) {
-        if( t === 0 || t === 1 ) return t;
-        var p = (1 - Math.min(m, 998) / 1000), st = t / 1, st1 = st - 1, s = p / ( 2 * Math.PI ) * Math.asin( 1 );
-        return -( Math.pow( 2, 10 * st1 ) * Math.sin( ( st1 - s ) * ( 2 * Math.PI ) / p ) );
+      Sine: function(t) {
+        return 1 + Math.sin(Math.PI / 2 * t - Math.PI / 2);
       },
-      Back: function(t) { return t * t * ( 3 * t - 2 ); },
+      Circ: function(t) {
+        return 1 - Math.sqrt(1 - t * t);
+      },
+      Elastic: function(t, m) {
+        if (t === 0 || t === 1) return t;
+        var p = (1 - Math.min(m, 998) / 1000),
+          st = t / 1,
+          st1 = st - 1,
+          s = p / (2 * Math.PI) * Math.asin(1);
+        return -(Math.pow(2, 10 * st1) * Math.sin((st1 - s) * (2 * Math.PI) / p));
+      },
+      Back: function(t) {
+        return t * t * (3 * t - 2);
+      },
       Bounce: function(t) {
-        var pow2, bounce = 4;
-        while ( t < ( ( pow2 = Math.pow( 2, --bounce ) ) - 1 ) / 11 ) {}
-        return 1 / Math.pow( 4, 3 - bounce ) - 7.5625 * Math.pow( ( pow2 * 3 - 2 ) / 22 - t, 2 );
+        var pow2,
+          bounce = 4;
+        while (t < ((pow2 = Math.pow(2, --bounce)) - 1) / 11) {
+        }
+        return 1 / Math.pow(4, 3 - bounce) - 7.5625 * Math.pow((pow2 * 3 - 2) / 22 - t, 2);
       }
     }
     names.forEach(function(name, i) {
       functions[name] = function(t) {
-        return Math.pow( t, i + 2 );
+        return Math.pow(t, i + 2);
       }
     });
     Object.keys(functions).forEach(function(name) {
       var easeIn = functions[name];
       eases['easeIn' + name] = easeIn;
-      eases['easeOut' + name] = function(t, m) { return 1 - easeIn(1 - t, m); };
-      eases['easeInOut' + name] = function(t, m) { return t < 0.5 ? easeIn(t * 2, m) / 2 : 1 - easeIn(t * -2 + 2, m) / 2; };
-      eases['easeOutIn' + name] = function(t, m) { return t < 0.5 ? (1 - easeIn(1 - 2 * t, m)) / 2 : (easeIn(t * 2 - 1, m) + 1) / 2; };
+      eases['easeOut' + name] = function(t, m) {
+        return 1 - easeIn(1 - t, m);
+      };
+      eases['easeInOut' + name] = function(t, m) {
+        return t < 0.5 ? easeIn(t * 2, m) / 2 : 1 - easeIn(t * -2 + 2, m) / 2;
+      };
+      eases['easeOutIn' + name] = function(t, m) {
+        return t < 0.5 ? (1 - easeIn(1 - 2 * t, m)) / 2 : (easeIn(t * 2 - 1, m) + 1) / 2;
+      };
     });
-    eases.linear = function(t) { return t; };
+    eases.linear = function(t) {
+      return t;
+    };
     return eases;
   })();
 
@@ -114,7 +160,7 @@
     try {
       var nodes = document.querySelectorAll(str);
       return nodes;
-    } catch(e) {
+    } catch (e) {
       return false;
     }
   }
@@ -135,19 +181,24 @@
 
   var toArray = function(o) {
     if (is.arr(o)) return o;
-    if (is.str(o)) o = selectString(o) || o;
+    if (is.str(o))
+      o = selectString(o) || o;
     if (o instanceof NodeList || o instanceof HTMLCollection) return [].slice.call(o);
     return [o];
   }
 
   var arrayContains = function(arr, val) {
-    return arr.some(function(a) { return a === val; });
+    return arr.some(function(a) {
+      return a === val;
+    });
   }
 
   var groupArrayByProps = function(arr, propsArr) {
     var groups = {};
     arr.forEach(function(o) {
-      var group = JSON.stringify(propsArr.map(function(p) { return o[p]; }));
+      var group = JSON.stringify(propsArr.map(function(p) {
+        return o[p];
+      }));
       groups[group] = groups[group] || [];
       groups[group].push(o);
     });
@@ -179,7 +230,9 @@
 
   var hexToRgb = function(hex) {
     var rgx = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    var hex = hex.replace(rgx, function(m, r, g, b) { return r + r + g + g + b + b; });
+    var hex = hex.replace(rgx, function(m, r, g, b) {
+      return r + r + g + g + b + b;
+    });
     var rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     var r = parseInt(rgb[1], 16);
     var g = parseInt(rgb[2], 16);
@@ -193,22 +246,26 @@
     var s = parseInt(hsl[2]) / 100;
     var l = parseInt(hsl[3]) / 100;
     var hue2rgb = function(p, q, t) {
-      if (t < 0) t += 1;
-      if (t > 1) t -= 1;
-      if (t < 1/6) return p + (q - p) * 6 * t;
-      if (t < 1/2) return q;
-      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      if (t < 0)
+        t += 1;
+      if (t > 1)
+        t -= 1;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
       return p;
     }
-    var r, g, b;
+    var r,
+      g,
+      b;
     if (s == 0) {
       r = g = b = l;
     } else {
       var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
       var p = 2 * l - q;
-      r = hue2rgb(p, q, h + 1/3);
+      r = hue2rgb(p, q, h + 1 / 3);
       g = hue2rgb(p, q, h);
-      b = hue2rgb(p, q, h - 1/3);
+      b = hue2rgb(p, q, h - 1 / 3);
     }
     return 'rgb(' + r * 255 + ',' + g * 255 + ',' + b * 255 + ')';
   }
@@ -254,22 +311,27 @@
       props.push(match[1]);
       values.push(match[2]);
     }
-    var val = values.filter(function(f, i) { return props[i] === prop; });
+    var val = values.filter(function(f, i) {
+      return props[i] === prop;
+    });
     return val.length ? val[0] : defaultVal;
   }
 
   var getAnimationType = function(el, prop) {
-    if ( is.dom(el) && arrayContains(validTransforms, prop)) return 'transform';
-    if ( is.dom(el) && (el.getAttribute(prop) || (is.svg(el) && el[prop]))) return 'attribute';
-    if ( is.dom(el) && (prop !== 'transform' && getCSSValue(el, prop))) return 'css';
+    if (is.dom(el) && arrayContains(validTransforms, prop)) return 'transform';
+    if (is.dom(el) && (el.getAttribute(prop) || (is.svg(el) && el[prop]))) return 'attribute';
+    if (is.dom(el) && (prop !== 'transform' && getCSSValue(el, prop))) return 'css';
     if (!is.nul(el[prop]) && !is.und(el[prop])) return 'object';
   }
 
   var getInitialTargetValue = function(target, prop) {
     switch (getAnimationType(target, prop)) {
-      case 'transform': return getTransformValue(target, prop);
-      case 'css': return getCSSValue(target, prop);
-      case 'attribute': return target.getAttribute(prop);
+      case 'transform':
+        return getTransformValue(target, prop);
+      case 'css':
+        return getCSSValue(target, prop);
+      case 'attribute':
+        return target.getAttribute(prop);
     }
     return target[prop] || 0;
   }
@@ -278,7 +340,8 @@
     if (is.col(val)) return colorToRgb(val);
     if (getUnit(val)) return val;
     var unit = getUnit(values.to) ? getUnit(values.to) : getUnit(values.from);
-    if (!unit && originalCSS) unit = getUnit(originalCSS);
+    if (!unit && originalCSS)
+      unit = getUnit(originalCSS);
     return unit ? val + unit : val;
   }
 
@@ -303,7 +366,10 @@
   var getAnimatables = function(targets) {
     var targets = targets ? (flattenArray(is.arr(targets) ? targets.map(toArray) : toArray(targets))) : [];
     return targets.map(function(t, i) {
-      return { target: t, id: i };
+      return {
+        target: t,
+        id: i
+      };
     });
   }
 
@@ -313,7 +379,9 @@
     var props = [];
     for (var p in params) {
       if (!defaultSettings.hasOwnProperty(p) && p !== 'targets') {
-        var prop = is.obj(params[p]) ? cloneObject(params[p]) : {value: params[p]};
+        var prop = is.obj(params[p]) ? cloneObject(params[p]) : {
+          value: params[p]
+        };
         prop.name = p;
         props.push(mergeObjects(prop, settings));
       }
@@ -322,7 +390,7 @@
   }
 
   var getPropertiesValues = function(target, prop, value, i) {
-    var values = toArray( is.fnc(value) ? value(target, i) : value);
+    var values = toArray(is.fnc(value) ? value(target, i) : value);
     return {
       from: (values.length > 1) ? values[0] : getInitialTargetValue(target, prop),
       to: (values.length > 1) ? values[1] : values[0]
@@ -341,7 +409,10 @@
       valid.from = getValidValue(values, values.from, originalCSS);
       valid.to = getValidValue(values, values.to, originalCSS);
     }
-    return { from: decomposeValue(valid.from), to: decomposeValue(valid.to) };
+    return {
+      from: decomposeValue(valid.from),
+      to: decomposeValue(valid.to)
+    };
   }
 
   var getTweensProps = function(animatables, props) {
@@ -372,7 +443,9 @@
     var splittedProps = groupArrayByProps(tweensProps, ['name', 'from', 'to', 'delay', 'duration']);
     return splittedProps.map(function(tweenProps) {
       var tween = cloneObject(tweenProps[0]);
-      tween.animatables = tweenProps.map(function(p) { return p.animatables });
+      tween.animatables = tweenProps.map(function(p) {
+        return p.animatables
+      });
       tween.totalDuration = tween.delay + tween.duration;
       return tween;
     });
@@ -385,17 +458,22 @@
       var delayVal = anim.duration - (tween.delay + tween.duration);
       tween.from = toVal;
       tween.to = fromVal;
-      if (delays) tween.delay = delayVal;
+      if (delays)
+        tween.delay = delayVal;
     });
     anim.reversed = anim.reversed ? false : true;
   }
 
   var getTweensDuration = function(tweens) {
-    if (tweens.length) return Math.max.apply(Math, tweens.map(function(tween){ return tween.totalDuration; }));
+    return Math.max.apply(Math, tweens.map(function(tween) {
+      return tween.totalDuration;
+    }));
   }
 
   var getTweensDelay = function(tweens) {
-    if (tweens.length) return Math.min.apply(Math, tweens.map(function(tween){ return tween.delay; }));
+    return Math.min.apply(Math, tweens.map(function(tween) {
+      return tween.delay;
+    }));
   }
 
   // will-change
@@ -404,9 +482,11 @@
     var props = [];
     var els = [];
     anim.tweens.forEach(function(tween) {
-      if (tween.type === 'css' || tween.type === 'transform' ) {
+      if (tween.type === 'css' || tween.type === 'transform') {
         props.push(tween.type === 'css' ? stringToHyphens(tween.name) : 'transform');
-        tween.animatables.forEach(function(animatable) { els.push(animatable.target); });
+        tween.animatables.forEach(function(animatable) {
+          els.push(animatable.target);
+        });
       }
     });
     return {
@@ -451,9 +531,12 @@
     var p0 = point(-1);
     var p1 = point(+1);
     switch (tween.name) {
-      case 'translateX': return p.x;
-      case 'translateY': return p.y;
-      case 'rotate': return Math.atan2(p1.y - p0.y, p1.x - p0.x) * 180 / Math.PI;
+      case 'translateX':
+        return p.x;
+      case 'translateY':
+        return p.y;
+      case 'rotate':
+        return Math.atan2(p1.y - p0.y, p1.x - p0.x) * 180 / Math.PI;
     }
   }
 
@@ -486,19 +569,28 @@
         var target = animatable.target;
         var name = tween.name;
         switch (tween.type) {
-          case 'css': target.style[name] = progress; break;
-          case 'attribute': target.setAttribute(name, progress); break;
-          case 'object': target[name] = progress; break;
+          case 'css':
+            target.style[name] = progress;
+            break;
+          case 'attribute':
+            target.setAttribute(name, progress);
+            break;
+          case 'object':
+            target[name] = progress;
+            break;
           case 'transform':
-          if (!transforms) transforms = {};
-          if (!transforms[id]) transforms[id] = [];
-          transforms[id].push(progress);
-          break;
+            if (!transforms)
+              transforms = {};
+            if (!transforms[id])
+              transforms[id] = [];
+            transforms[id].push(progress);
+            break;
         }
       }
     }
     if (transforms) {
-      if (!transform) transform = (getCSSValue(document.body, transformStr) ? '' : '-webkit-') + transformStr;
+      if (!transform)
+        transform = (getCSSValue(document.body, transformStr) ? '' : '-webkit-') + transformStr;
       for (var t in transforms) {
         anim.animatables[t].target.style[transform] = transforms[t].join(' ');
       }
@@ -513,8 +605,8 @@
     anim.settings = mergeObjects(params, defaultSettings);
     anim.properties = getProperties(params, anim.settings);
     anim.tweens = getTweens(anim.animatables, anim.properties);
-    anim.duration = getTweensDuration(anim.tweens) || params.duration;
-    anim.delay = getTweensDelay(anim.tweens) || params.delay;
+    anim.duration = anim.tweens.length ? getTweensDuration(anim.tweens) : params.duration;
+    anim.delay = anim.tweens.length ? getTweensDelay(anim.tweens) : params.delay;
     anim.currentTime = 0;
     anim.progress = 0;
     anim.ended = false;
@@ -527,7 +619,9 @@
   var raf = 0;
 
   var engine = (function() {
-    var play = function() { raf = requestAnimationFrame(step); };
+    var play = function() {
+      raf = requestAnimationFrame(step);
+    };
     var step = function(t) {
       if (animations.length) {
         for (var i = 0; i < animations.length; i++) animations[i].tick(t);
@@ -547,12 +641,14 @@
 
     anim.tick = function(now) {
       anim.ended = false;
-      if (!time.start) time.start = now;
+      if (!time.start)
+        time.start = now;
       time.current = Math.min(Math.max(time.last + now - time.start, 0), anim.duration);
       setAnimationProgress(anim, time.current);
       var s = anim.settings;
       if (time.current >= anim.delay) {
-        if (s.begin) s.begin(anim); s.begin = undefined;
+        if (s.begin) s.begin(anim);
+        s.begin = undefined;
         if (s.update) s.update(anim);
       }
       if (time.current >= anim.duration) {
@@ -581,12 +677,14 @@
 
     anim.play = function(params) {
       anim.pause();
-      if (params) anim = mergeObjects(createAnimation(mergeObjects(params, anim.settings)), anim);
+      if (params)
+        anim = mergeObjects(createAnimation(mergeObjects(params, anim.settings)), anim);
       time.start = 0;
       time.last = anim.ended ? 0 : anim.currentTime;
       var s = anim.settings;
       if (s.direction === 'reverse') reverseTweens(anim);
-      if (s.direction === 'alternate' && !s.loop) s.loop = 1;
+      if (s.direction === 'alternate' && !s.loop)
+        s.loop = 1;
       setWillChange(anim);
       animations.push(anim);
       if (!raf) engine();
@@ -609,12 +707,12 @@
 
   var remove = function(elements) {
     var targets = flattenArray(is.arr(elements) ? elements.map(toArray) : toArray(elements));
-    for (var i = animations.length-1; i >= 0; i--) {
+    for (var i = animations.length - 1; i >= 0; i--) {
       var animation = animations[i];
       var tweens = animation.tweens;
-      for (var t = tweens.length-1; t >= 0; t--) {
+      for (var t = tweens.length - 1; t >= 0; t--) {
         var animatables = tweens[t].animatables;
-        for (var a = animatables.length-1; a >= 0; a--) {
+        for (var a = animatables.length - 1; a >= 0; a--) {
           if (arrayContains(targets, animatables[a].target)) {
             animatables.splice(a, 1);
             if (!animatables.length) tweens.splice(t, 1);
