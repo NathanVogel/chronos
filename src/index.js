@@ -1,4 +1,5 @@
-// var hhmmss = new HHMMSS({
+var hhmmss = null;
+// hhmmss = new HHMMSS({
 //   type: "horizontal",
 //   horizontalAlign: "hcenter",
 //   verticalAlign: "vcenter",
@@ -19,6 +20,10 @@ var img_jupiter,
   img_mars,
   img_moon,
   img_shadow;
+
+// Change camera every 5 minutes.
+var cameraFrequency = 1000 * 60 * 5 / 30;
+var lastCameraPick = new Date(Math.floor((new Date()).getTime() / cameraFrequency) * cameraFrequency).getTime();
 
 function preload() {
   img_jupiter = loadImage("img/jupiter-transparent.png");
@@ -74,9 +79,9 @@ function setup() {
 
   let starRadius = 60 + Math.random() * 200;
   let planetRadius = 30 + Math.random() * 50;
-  let planetDistance = 2 * starRadius + planetRadius + Math.random() * 200;
+  let planetDistance = 2 * starRadius + planetRadius + Math.random() * 240;
   let moonRadius = 10 + Math.random() * 20;
-  let moonDistance = 2 * planetRadius + moonRadius + Math.random() * 80;
+  let moonDistance = 2 * planetRadius + moonRadius + Math.random() * 60;
   let satelliteDistance = moonRadius + 5 + Math.random() * 20
   star = new Planet(null, drawSun, getNoAngle, starRadius, 0, null);
   star.satellite = new Planet(generateFractalGradientPlanet, drawPlanet, getMinutesAngle, planetRadius, planetDistance, star);
@@ -86,7 +91,7 @@ function setup() {
   );
 
 
-  planetToFollow = star.satellite;
+
 
 
   // ====== SKY ======
@@ -111,6 +116,12 @@ function setup() {
       Math.random() * 3)
     );
   }
+
+  // ====== CAMERA ======
+
+  planetToFollow = star;
+  currentScale = 1;
+  pickACamera();
 
 
   // ====== SETUP ======
@@ -239,19 +250,22 @@ getNoAngle = () => {
 }
 
 getMillisAngle = () => {
-  let a = ((1 - (new Date().getMilliseconds() / 1000)) * TWO_PI) + PI;
+  let millis = (hhmmss) ? hhmmss.getMillis() : new Date().getMilliseconds();
+  let a = ((1 - (millis / 1000)) * TWO_PI) + PI;
   return a;
 }
 
 getSecondsAngle = () => {
-  let a = ((1 - (new Date().getSeconds() / 60)) * TWO_PI);
+  let seconds = (hhmmss) ? hhmmss.getS() : new Date().getSeconds();
+  let a = ((1 - (seconds / 60)) * TWO_PI);
   a += ((getMillisAngle() ) / 60);
   a += PI;
   return a;
 }
 
 getMinutesAngle = () => {
-  let a = ((1 - (new Date().getMinutes() / 60)) * TWO_PI);
+  let minutes = (hhmmss) ? hhmmss.getM() : new Date().getMinutes();
+  let a = ((1 - (minutes / 60)) * TWO_PI);
   a += ((getSecondsAngle() ) / 60);
   a += PI;
   return a;
@@ -421,7 +435,12 @@ drawMoon = function() {
 drawSatellite = function() {
   fill(150, 150, 150);
   rectMode(CENTER);
+
+  this.imageRotation += this.imageRotationSpeed * 250;
+  push();
+  rotate(this.imageRotation);
   rect(0, 0, this.radius, this.radius);
+  pop();
 }
 
 
@@ -470,7 +489,8 @@ drawAtmosphere = function(radius, size, opacity) {
 // Draw every frame
 draw = () => {
   background(14);
-
+  // console.log(hhmmss.getMillis());
+  // console.log("S : " + hhmmss.getS());
   // Update the planets position.
   // Do this before updating the camera, as the camera can follow planets.
   // The offset between the camera and the planet can cause stutters
@@ -499,5 +519,11 @@ draw = () => {
   while (currentPlanet) {
     currentPlanet.updateDrawing();
     currentPlanet = currentPlanet.satellite;
+  }
+
+  if (new Date().getTime() - lastCameraPick > cameraFrequency) {
+    // Avoid adding millis each time.
+    lastCameraPick = new Date(Math.floor((new Date()).getTime() / cameraFrequency) * cameraFrequency).getTime()
+    pickACamera();
   }
 }

@@ -10,7 +10,7 @@ var cameraOffset = {
 
 var zoomAnimation;
 zoomTo = (newScale, duration, easing) => {
-  console.log("New scale : " + newScale);
+  // console.log("New scale : " + newScale);
   if (zoomAnimation) {
     zoomAnimation.pause();
   }
@@ -53,17 +53,19 @@ watchPlanetGoBy = (planet) => {
 
   // Follow the star, but preserving our camera
   planetToFollow = planet.celestialParent;
+  let isSeconds = (planet.getAngle === getSecondsAngle)
 
-  // Calculate the position that the object will be at in a few minutes.
-  var cameraOffsetX = Math.sin(planet.getAngle() - radians(6)) * planet.orbitRadius;
-  var cameraOffsetY = Math.cos(planet.getAngle() - radians(6)) * planet.orbitRadius;
-  // Offset our position to move to the parent object (usually the star).
-  cameraOffsetX += planet.celestialParent.position.x;
-  cameraOffsetY += planet.celestialParent.position.y;
+  // Calculate the position that the object will be at in a few moments.
+  var degreesAdvance = isSeconds ? 75 : 7;
+  var cameraOffsetX = Math.sin(planet.getAngle() - radians(degreesAdvance)) * planet.orbitRadius;
+  var cameraOffsetY = Math.cos(planet.getAngle() - radians(degreesAdvance)) * planet.orbitRadius;
 
-  moveTo(cameraOffsetX, cameraOffsetY, 2000, "easeInOutQuad");
+  moveTo(cameraOffsetX, cameraOffsetY, 1000, "easeInOutQuad");
 
-  let newScale = getMatchingZoom(planet.satellite.orbitRadius, width / 2);
+  let newScale = 1 + Math.random() * 5
+  if (!isSeconds) {
+    newScale = getMatchingZoom(planet.satellite.orbitRadius, width / 2);
+  }
   zoomTo(newScale, 2000, "easeInOutQuad");
 }
 
@@ -84,23 +86,53 @@ followPlanet = (planet) => {
 
 var zoomStep = 1.03;
 mouseWheel = (event) => {
-  //print(event.delta);
-  //print(currentScale);
+  // Trackpad scroll can cause animation conflict -> Re-init
+  if (!currentScale) {
+    currentScale = 2;
+  }
+  // Calculate the newScale from the delta of scroll
   let newScale;
   if (event.delta > 0 && currentScale > 0.1) {
     newScale = currentScale / (zoomStep + event.delta / 100);
   } else if (event.delta < 0 && currentScale < 100) {
     newScale = currentScale * (zoomStep - event.delta / 100);
   }
+  // Zoom to that scale.
   zoomTo(newScale, 300, "easeOutQuad");
   return false;
 }
 
+pickACamera = () => {
+  // Pick a random planet.
+  let planet = star.satellite;
+  if (Math.random() < 0.5) {
+    console.log("moon");
+    planet = star.satellite.satellite;
+  } else {
+    console.log("planet");
+  }
+  // Pick a random camera function.
+  if (Math.random() < 0.5) {
+    followPlanet(planet);
+    console.log("follow");
+  } else {
+    console.log("watch");
+    watchPlanetGoBy(planet);
+  }
+}
+
 
 mouseClicked = () => {
-  if (planetToFollow.satellite) {
-    followPlanet(planetToFollow.satellite);
+  // Chain cameras
+  // if (planetToFollow.satellite) {
+  //   followPlanet(planetToFollow.satellite);
+  // } else {
+  //   watchPlanetGoBy(star.satellite);
+  // }
+
+  // Pick a random camera.
+  if (hhmmss) {
   } else {
-    watchPlanetGoBy(star.satellite.satellite);
+    pickACamera();
   }
 }
