@@ -103,6 +103,7 @@ mouseWheel = (event) => {
 }
 
 pickACamera = () => {
+  console.log("yo");
   // Pick a random planet.
   let planet = star.satellite;
   if (Math.random() < 0.5) {
@@ -120,6 +121,7 @@ pickACamera = () => {
     watchPlanetGoBy(planet);
   }
 }
+console.log("hey");
 
 
 mouseClicked = () => {
@@ -129,7 +131,7 @@ mouseClicked = () => {
   // } else {
   //   watchPlanetGoBy(star.satellite);
   // }
-
+  console.log(camera);
   // Pick a random camera.
   if (hhmmss) {
   } else {

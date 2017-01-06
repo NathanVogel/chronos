@@ -22,7 +22,7 @@ var img_jupiter,
   img_shadow;
 
 // Change camera every 5 minutes.
-var cameraFrequency = 1000 * 60 * 5 / 30;
+var cameraFrequency = 1000 * 60 * 5 / 10;
 var lastCameraPick = new Date(Math.floor((new Date()).getTime() / cameraFrequency) * cameraFrequency).getTime();
 
 function preload() {
@@ -35,6 +35,7 @@ function preload() {
 
 var star,
   planetToFollow;
+var backgroundColor;
 var systemDensity = 1; // Per 100x100 pixels surface at origin depth
 var systemSkyDistance = 100;
 var stars = [];
@@ -55,6 +56,7 @@ var planetMask;
  *********/
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
+  backgroundColor = color(14);
 
   // Note : better to stay at small size, not sure why anymore (only in 3D ?)
 
@@ -76,20 +78,19 @@ function setup() {
   //   star.satellite.satellite
   // );
 
-
-  let starRadius = 60 + Math.random() * 200;
+  // The radius contains the halo
+  let starRadius = 300 + Math.random() * 200;
   let planetRadius = 30 + Math.random() * 50;
-  let planetDistance = 2 * starRadius + planetRadius + Math.random() * 240;
-  let moonRadius = 10 + Math.random() * 20;
+  let planetDistance = starRadius + planetRadius + Math.random() * 240;
+  let moonRadius = 6 + Math.random() * 20;
   let moonDistance = 2 * planetRadius + moonRadius + Math.random() * 60;
   let satelliteDistance = moonRadius + 5 + Math.random() * 20
-  star = new Planet(null, drawSun, getNoAngle, starRadius, 0, null);
+  star = new Planet(generateSun, drawSun, getNoAngle, starRadius, 0, null);
   star.satellite = new Planet(generateFractalGradientPlanet, drawPlanet, getMinutesAngle, planetRadius, planetDistance, star);
   star.satellite.satellite = new Planet(generateGradientPlanet, drawPlanet, getSecondsAngle, moonRadius, moonDistance, star.satellite);
   star.satellite.satellite.satellite = new Planet(null, drawSatellite, getMillisAngle, 2, satelliteDistance,
     star.satellite.satellite
   );
-
 
 
 
@@ -345,6 +346,64 @@ generateGradientPlanet = function() {
 
 
 
+generateSun = function() {
+  this.pg = createGraphics(planetResolution, planetResolution);
+  this.pg.translate(planetResolution / 2, planetResolution / 2);
+  this.pg.ellipse(CENTER);
+
+
+  let c = getRandomColor();
+  let white = color(255, 248, 245);
+  let gScale = 20;
+
+  let w = 1;
+  let m = planetResolution / 2 * (0.2 + 0.5 * Math.random());
+  let o = 70;
+  let radius = planetResolution / 2 - m;
+
+  this.pg.fill(255, 250, 245);
+  this.pg.ellipse(0, 0, radius * 2);
+
+  this.pg.strokeWeight(w);
+  this.pg.noFill();
+
+  let insideLuminanceSize = radius * 0.9;
+  let r = 180 + 75 * Math.random();
+  let g = 180 + 75 * Math.random();
+  let b = 180 + 75 * Math.random();
+
+  for (let i = 0; i < m; i += w) {
+    this.pg.stroke(r, g, b, pow((o - i * o / m) / (o * 2), 4) * o * 16);
+    this.pg.ellipse(0, 0, radius * 2 + i - 1);
+  }
+
+  for (let i = w; i < insideLuminanceSize; i += w) {
+    this.pg.stroke(r, g, b, pow((o - i * o / insideLuminanceSize) / (o * 2), 4) * o * 16);
+    this.pg.ellipse(0, 0, radius * 2 - i - 1);
+  }
+
+// for (let i = 0; i < gScale; i++) {
+//   if (i <= gScale / 2) {
+//     console.log("a")
+//     let tmp = lerpColor(backgroundColor, c, 0.05 * i);
+//     this.pg.stroke(tmp);
+//   } else {
+//     let tmp = lerpColor(c, white, 0.05 * i);
+//     this.pg.stroke(tmp);
+//     console.log("b")
+//   }
+//   if (i == gScale / 20 - 1) {
+//     this.pg.fill(120, 120, 120);
+//     this.pg.fill(white);
+//     console.log("c")
+//   }
+//
+//   this.pg.ellipse(0, 0, 500 - i * w, 500 - i * w);
+// }
+}
+
+
+
 drawImageSun = function() {
   fill(240, 240, 0);
   //ellipse(0, 0, this.radius * 2, this.radius * 2, 70);
@@ -378,11 +437,17 @@ drawImageMoon = function() {
 // LINES GRADIENT
 
 drawSun = function() {
-  let factor = 100 / this.radius;
-  for (let r = 0; r < this.radius; r++) {
-    let o = (this.radius - r);
-    fill(r * factor + 140, r * factor + 120, 0);
-    ellipse(0, 0, o * 2, o * 2);
+
+  // Draw the planet
+  if (this.pg) {
+    image(this.pg, 0, 0, this.radius * 2, this.radius * 2);
+  } else {
+    let factor = 100 / this.radius;
+    for (let r = 0; r < this.radius; r++) {
+      let o = (this.radius - r);
+      fill(r * factor + 140, r * factor + 120, 0);
+      ellipse(0, 0, o * 2, o * 2);
+    }
   }
 }
 
@@ -488,7 +553,7 @@ drawAtmosphere = function(radius, size, opacity) {
 // ====== DRAW ======
 // Draw every frame
 draw = () => {
-  background(14);
+  background(backgroundColor);
   // console.log(hhmmss.getMillis());
   // console.log("S : " + hhmmss.getS());
   // Update the planets position.
