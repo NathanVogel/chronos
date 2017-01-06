@@ -37,8 +37,9 @@ function HHMMSS(options) {
   hhmmss_m.innerHTML = m < 10 ? "0" + m : m;
   hhmmss_s.innerHTML = s < 10 ? "0" + s : s;
 
+  var lastMillis = (new Date()).getMilliseconds();
   function updateTime() {
-    if (!s_active && !m_active && !h_active) {
+    if (!s_active && !m_active && !h_active && lastMillis > new Date().getMilliseconds()) {
       s++;
       if (s >= 60) {
         s = 0;
@@ -52,9 +53,10 @@ function HHMMSS(options) {
         }
       }
     }
-
+    lastMillis = new Date().getMilliseconds();
     updateDisplayedTime();
   }
+  this.updateTime = updateTime;
 
   function updateDisplayedTime() {
     if (!h_waitingForInput)
@@ -65,7 +67,7 @@ function HHMMSS(options) {
       hhmmss_s.innerHTML = s < 10 ? "0" + s : s;
   }
 
-  setInterval(updateTime, 1000);
+  // setInterval(updateTime, 100);
 
   this.getS = function() {
     return s;

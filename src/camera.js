@@ -32,19 +32,21 @@ moveTo = (cameraOffsetX, cameraOffsetY, duration, easing) => {
   if (moveAnimation) {
     moveAnimation.pause();
   }
-  var moveAnimation = anime({
+  moveAnimation = anime({
     targets: cameraOffset,
     x: cameraOffsetX,
     y: cameraOffsetY,
     easing: easing,
-    duration: duration
+    duration: duration,
+    complete: function() {
+      moveAnimation = null;
+    }
   });
 }
 
 
 getMatchingZoom = (realDistance, screenDistance) => {
-  let newScale = screenDistance * pixelDensity() / realDistance;
-  newScale *= 1 + Math.random() * 1.2;
+  let newScale = screenDistance / pixelDensity() / realDistance;
   return newScale;
 }
 
@@ -56,15 +58,16 @@ watchPlanetGoBy = (planet) => {
   let isSeconds = (planet.getAngle === getSecondsAngle)
 
   // Calculate the position that the object will be at in a few moments.
-  var degreesAdvance = isSeconds ? 75 : 7;
-  var cameraOffsetX = Math.sin(planet.getAngle() - radians(degreesAdvance)) * planet.orbitRadius;
-  var cameraOffsetY = Math.cos(planet.getAngle() - radians(degreesAdvance)) * planet.orbitRadius;
+  let degreesAdvance = isSeconds ? 75 : 7;
+  let cameraOffsetX = Math.sin(planet.getAngle() - radians(degreesAdvance)) * planet.orbitRadius;
+  let cameraOffsetY = Math.cos(planet.getAngle() - radians(degreesAdvance)) * planet.orbitRadius;
 
   moveTo(cameraOffsetX, cameraOffsetY, 1000, "easeInOutQuad");
 
   let newScale = 1 + Math.random() * 5
   if (!isSeconds) {
-    newScale = getMatchingZoom(planet.satellite.orbitRadius, width / 2);
+    newScale = getMatchingZoom(planet.satellite.orbitRadius, width);
+    newScale *= 1 + Math.random() * 1.2;
   }
   zoomTo(newScale, 2000, "easeInOutQuad");
 }
@@ -102,8 +105,21 @@ mouseWheel = (event) => {
   return false;
 }
 
+justChangedCamera = () => {
+  lastCameraPick = new Date(Math.floor((new Date()).getTime() / cameraFrequency) * cameraFrequency).getTime()
+  if (hhmmss) {
+    lastCameraPick = Math.floor(hhmmss.getTime() / cameraFrequency) * cameraFrequency;
+  }
+}
+
+justEndedTheWorld = () => {
+  lastEndOfTheWorld = new Date(Math.floor((new Date()).getTime() / endOfTheWorldFrequency) * endOfTheWorldFrequency).getTime()
+  if (hhmmss) {
+    lastEndOfTheWorld = Math.floor(hhmmss.getTime() / endOfTheWorldFrequency) * endOfTheWorldFrequency;
+  }
+}
+
 pickACamera = () => {
-  console.log("yo");
   // Pick a random planet.
   let planet = star.satellite;
   if (Math.random() < 0.5) {
@@ -120,9 +136,77 @@ pickACamera = () => {
     console.log("watch");
     watchPlanetGoBy(planet);
   }
+  justChangedCamera();
 }
-console.log("hey");
 
+
+goToCenter = (alignDuration) => {
+  planetToFollow = star;
+  moveTo(0, 0, alignDuration, "easeInOutSine");
+
+  let newScale = getMatchingZoom(
+    (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius) * (1.1 + 0.4 * Math.random()),
+    Math.max(width, height)
+  );
+  zoomTo(newScale, alignDuration, "easeInOutSine");
+}
+
+var endingTheWorld = false;
+endOfTheWorld = () => {
+  // Can't double end a world
+  if (endingTheWorld) {
+    return;
+  }
+  endingTheWorld = true;
+
+  let alignDuration = 6000;
+  let crashDuration = 16500;
+  // First align everything
+  goToCenter(alignDuration);
+  // Everything crashes
+  var ani1 = anime({
+    targets: star.satellite,
+    orbitRadius: star.radius * star.sunRatio * 0.5,
+    easing: "easeInExpo",
+    delay: alignDuration * 0.6,
+    duration: crashDuration
+  });
+  var ani2 = anime({
+    targets: star.satellite.satellite,
+    orbitRadius: 0,
+    easing: "easeInExpo",
+    delay: alignDuration * 0.6,
+    duration: crashDuration
+  });
+  // The star gets bigger
+  var ani3 = anime({
+    targets: star,
+    radius: Math.max(width, height) / star.sunRatio,
+    easing: "easeInExpo",
+    delay: alignDuration + 0.2 * crashDuration,
+    duration: 22000,
+    complete: function() {
+      console.log("done bigger");
+      // Zoom to the core of the star
+      currentScale = 10;
+      // Switch solar systems
+      generateSolarSystem();
+      // Zoom out from the center
+      let newScale = getMatchingZoom(
+        (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius),
+        Math.max(width, height)
+      );
+      let zoomOutDuration = 10000;
+      zoomTo(newScale, zoomOutDuration, "easeOutSine");
+      // Go back to normal camera mode after zooming out.
+      window.setTimeout(function() {
+        justChangedCamera();
+        justEndedTheWorld();
+        endingTheWorld = false;
+      }, zoomOutDuration * 2);
+    }
+  });
+}
 
 mouseClicked = () => {
   // Chain cameras
@@ -131,10 +215,24 @@ mouseClicked = () => {
   // } else {
   //   watchPlanetGoBy(star.satellite);
   // }
-  console.log(camera);
-  // Pick a random camera.
+
+
   if (hhmmss) {
   } else {
-    pickACamera();
+    // endOfTheWorld();
+    // pickACamera();
+    // generateSolarSystem();
   }
+}
+
+
+
+mouseDragged = (event) => {
+  // Don't drag during a move animation
+  if (hhmmss || endingTheWorld || moveAnimation) {
+    return;
+  }
+
+  cameraOffset.x = Number(cameraOffset.x) + (pmouseX - mouseX) / currentScale;
+  cameraOffset.y = Number(cameraOffset.y) + (pmouseY - mouseY) / currentScale;
 }

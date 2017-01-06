@@ -4,15 +4,16 @@ var hhmmss = null;
 //   horizontalAlign: "hcenter",
 //   verticalAlign: "vcenter",
 //   size: "small",
-//   invert: false,
-//   sleepTime: 200
+//   invert: true,
+//   sleepTime: 1000
 // });
-
-
-print = (str) => {
-  console.log(str);
+if (hhmmss) {
+  hhmmss.getTime = function() {
+    return (((hhmmss.getH() * 60 + hhmmss.getM()) * 60) + hhmmss.getS()) * 1000;
+  }
 }
-let logged = false;
+
+
 
 
 var img_jupiter,
@@ -22,16 +23,28 @@ var img_jupiter,
   img_shadow;
 
 // Change camera every 5 minutes.
-var cameraFrequency = 1000 * 60 * 5 / 10;
-var lastCameraPick = new Date(Math.floor((new Date()).getTime() / cameraFrequency) * cameraFrequency).getTime();
+var cameraFrequency = 1000 * 60 * 5;
+var lastCameraPick;
+justChangedCamera();
+// var lastCameraPick = new Date(Math.floor((new Date()).getTime() / cameraFrequency) * cameraFrequency).getTime();
+// if (hhmmss) {
+//   lastCameraPick = Math.floor(hhmmss.getTime() / cameraFrequency) * cameraFrequency;
+// }
+
+// Change world every hour.
+var endOfTheWorldFrequency = 1000 * 60 * 60;
+var lastEndOfTheWorld;
+justEndedTheWorld();
+
 
 function preload() {
-  img_jupiter = loadImage("img/jupiter-transparent.png");
-  img_moon = loadImage("img/moon.png");
   img_shadow = loadImage("img/shadow.png");
-  // img_mars = loadImage("img/marsmap1k.jpg");
-  img_sun = loadImage("img/sun.png");
+// img_jupiter = loadImage("img/jupiter-transparent.png");
+// img_moon = loadImage("img/moon.png");
+// img_mars = loadImage("img/marsmap1k.jpg");
+// img_sun = loadImage("img/sun.png");
 }
+
 
 var star,
   planetToFollow;
@@ -78,22 +91,8 @@ function setup() {
   //   star.satellite.satellite
   // );
 
-  // The radius contains the halo
-  let starRadius = 300 + Math.random() * 200;
-  let planetRadius = 30 + Math.random() * 50;
-  let planetDistance = starRadius + planetRadius + Math.random() * 240;
-  let moonRadius = 6 + Math.random() * 20;
-  let moonDistance = 2 * planetRadius + moonRadius + Math.random() * 60;
-  let satelliteDistance = moonRadius + 5 + Math.random() * 20
-  star = new Planet(generateSun, drawSun, getNoAngle, starRadius, 0, null);
-  star.satellite = new Planet(generateFractalGradientPlanet, drawPlanet, getMinutesAngle, planetRadius, planetDistance, star);
-  star.satellite.satellite = new Planet(generateGradientPlanet, drawPlanet, getSecondsAngle, moonRadius, moonDistance, star.satellite);
-  star.satellite.satellite.satellite = new Planet(null, drawSatellite, getMillisAngle, 2, satelliteDistance,
-    star.satellite.satellite
-  );
 
-
-
+  generateSolarSystem();
 
   // ====== SKY ======
 
@@ -104,9 +103,9 @@ function setup() {
   systemSizeX = maxSystemSpan * 5;
   systemSizeY = systemSizeX;
   systemStarCount = (systemSizeX * systemSizeY / (100 * 100)) * systemDensity;
-  print("Star count : " + systemStarCount);
-  if (systemStarCount > 500) {
-    systemStarCount = 500;
+  console.log("Star count : " + systemStarCount);
+  if (systemStarCount > 700) {
+    systemStarCount = 700;
   }
 
   for (let i = 0; i < systemStarCount; i++) {
@@ -120,7 +119,6 @@ function setup() {
 
   // ====== CAMERA ======
 
-  planetToFollow = star;
   currentScale = 1;
   pickACamera();
 
@@ -133,6 +131,29 @@ function setup() {
   noStroke();
 
 }
+
+
+
+// ======= SOLAR SYSTEM ======
+
+generateSolarSystem = () => {
+  // The radius contains the halo
+  let starRadius = 300 + Math.random() * 200;
+  let planetRadius = 30 + Math.random() * 50;
+  let planetDistance = starRadius + planetRadius + 10 + Math.random() * 240;
+  let moonRadius = 6 + Math.random() * 20;
+  let moonDistance = 2 * planetRadius + moonRadius + Math.random() * 60;
+  let satelliteDistance = moonRadius + 5 + Math.random() * 20
+  star = new Planet(generateSun, drawSun, getNoAngle, starRadius, 0, null);
+  star.satellite = new Planet(generateFractalGradientPlanet, drawPlanet, getMinutesAngle, planetRadius, planetDistance, star);
+  star.satellite.satellite = new Planet(generateGradientPlanet, drawPlanet, getSecondsAngle, moonRadius, moonDistance, star.satellite);
+  star.satellite.satellite.satellite = new Planet(null, drawSatellite, getMillisAngle, 2, satelliteDistance,
+    star.satellite.satellite
+  );
+  planetToFollow = star;
+}
+
+
 
 
 
@@ -162,6 +183,7 @@ class Planet {
     this.orbitRadius = orbitRadius;
     this.celestialParent = celestialParent;
     this.radius = radius;
+    this.sunRatio = 1;
 
     // Set a default position for the star. Which is always the center
     this.position = new Point(0, 0, 0);
@@ -358,8 +380,9 @@ generateSun = function() {
 
   let w = 1;
   let m = planetResolution / 2 * (0.2 + 0.5 * Math.random());
-  let o = 70;
+  let o = 55 + 200 * Math.random();
   let radius = planetResolution / 2 - m;
+  this.sunRatio = radius / planetResolution / 2;
 
   this.pg.fill(255, 250, 245);
   this.pg.ellipse(0, 0, radius * 2);
@@ -381,25 +404,6 @@ generateSun = function() {
     this.pg.stroke(r, g, b, pow((o - i * o / insideLuminanceSize) / (o * 2), 4) * o * 16);
     this.pg.ellipse(0, 0, radius * 2 - i - 1);
   }
-
-// for (let i = 0; i < gScale; i++) {
-//   if (i <= gScale / 2) {
-//     console.log("a")
-//     let tmp = lerpColor(backgroundColor, c, 0.05 * i);
-//     this.pg.stroke(tmp);
-//   } else {
-//     let tmp = lerpColor(c, white, 0.05 * i);
-//     this.pg.stroke(tmp);
-//     console.log("b")
-//   }
-//   if (i == gScale / 20 - 1) {
-//     this.pg.fill(120, 120, 120);
-//     this.pg.fill(white);
-//     console.log("c")
-//   }
-//
-//   this.pg.ellipse(0, 0, 500 - i * w, 500 - i * w);
-// }
 }
 
 
@@ -517,10 +521,17 @@ drawOvershadow = function(radius, angle) {
   pop();
 }
 
+
 drawProjectedshadow = function(radius, angle) {
+  let ratio = star.satellite.orbitRadius / star.radius;
+  let alpha = Math.min(0.33, ratio - star.sunRatio);
+  if (alpha < 0) {
+    alpha = 0;
+  }
+
   push();
   rotate(angle);
-  fill('rgba(0, 0, 0, 0.33)');
+  fill('rgba(0, 0, 0, ' + alpha + ')');
   noStroke();
   rectMode(CORNER);
   rect(-systemSizeX, -radius, systemSizeX, radius * 2);
@@ -534,9 +545,6 @@ drawAtmosphere = function(radius, size, opacity) {
   strokeWeight(w);
   noFill();
   for (let i = 0; i < m && i >= 0; i += w) {
-    if (!logged) {
-      //console.log((o - i * o / m))
-    }
     stroke(255, 255, 255, pow((o - i * o / m) / (o * 2), 4) * o * 16);
     ellipse(0, 0, radius * 2 - (w > 0 ? +i : -i));
     // Go back the other way if we reached the top
@@ -544,7 +552,6 @@ drawAtmosphere = function(radius, size, opacity) {
       w = -w;
     }
   }
-  logged = true;
 }
 
 
@@ -553,6 +560,7 @@ drawAtmosphere = function(radius, size, opacity) {
 // ====== DRAW ======
 // Draw every frame
 draw = () => {
+
   background(backgroundColor);
   // console.log(hhmmss.getMillis());
   // console.log("S : " + hhmmss.getS());
@@ -580,15 +588,56 @@ draw = () => {
   }
 
   // We can now draw the planets
+
+  // Star to satllite (above)
+  // currentPlanet = star;
+  // while (currentPlanet) {
+  //   currentPlanet.updateDrawing();
+  //   currentPlanet = currentPlanet.satellite;
+  // }
+
+  // Satellite to star (above)
   currentPlanet = star;
-  while (currentPlanet) {
-    currentPlanet.updateDrawing();
+  // find the last satellite
+  while (currentPlanet.satellite) {
     currentPlanet = currentPlanet.satellite;
   }
+  // draw everything from here.
+  while (currentPlanet) {
+    currentPlanet.updateDrawing();
+    currentPlanet = currentPlanet.celestialParent;
+  }
 
-  if (new Date().getTime() - lastCameraPick > cameraFrequency) {
-    // Avoid adding millis each time.
-    lastCameraPick = new Date(Math.floor((new Date()).getTime() / cameraFrequency) * cameraFrequency).getTime()
-    pickACamera();
+  // ====== EVENTS =======
+
+  // Don't do events during long animations
+  // And not while editing the time.
+  if (hhmmss) {
+    if (!endingTheWorld && !mouseIsPressed) {
+      // Check if we went back in time
+      if (hhmmss.getTime() < lastEndOfTheWorld) {
+        justEndedTheWorld();
+      }
+      if (hhmmss.getTime() < lastCameraPick) {
+        justChangedCamera();
+      }
+      // Check for end of the world
+      if (hhmmss.getTime() - lastEndOfTheWorld > endOfTheWorldFrequency) {
+        endOfTheWorld();
+      }
+      // Check for camera after, as at every round hour, world gets prioritized
+      else if (hhmmss.getTime() - lastCameraPick > cameraFrequency) {
+        pickACamera();
+      }
+    }
+    hhmmss.updateTime();
+  }
+  // Regular event handling without hhmmss
+  else if (!endingTheWorld) {
+    if (new Date().getTime() - lastEndOfTheWorld > endOfTheWorldFrequency) {
+      endOfTheWorld();
+    } else if (new Date().getTime() - lastCameraPick > cameraFrequency) {
+      pickACamera();
+    }
   }
 }
