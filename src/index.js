@@ -79,8 +79,10 @@ function setup() {
   planetMask = createGraphics(planetResolution, planetResolution);
   planetMask.noStroke();
   planetMask.fill(color('white'));
+  planetMask.smooth();
   planetMask.ellipseMode(CENTER);
   planetMask.ellipse(planetResolution / 2, planetResolution / 2, planetResolution, planetResolution);
+  planetMask.smooth();
   planetMask.loadPixels();
 
   // Jpeg version :
@@ -375,7 +377,7 @@ generateSun = function() {
 
 
   let c = getRandomColor();
-  let white = color(255, 248, 245);
+  let starCenterColor = color(250, 230, 220);
   let gScale = 20;
 
   let w = 1;
@@ -384,7 +386,7 @@ generateSun = function() {
   let radius = planetResolution / 2 - m;
   this.sunRatio = radius / planetResolution / 2;
 
-  this.pg.fill(255, 250, 245);
+  this.pg.fill(starCenterColor);
   this.pg.ellipse(0, 0, radius * 2);
 
   this.pg.strokeWeight(w);

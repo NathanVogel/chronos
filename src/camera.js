@@ -231,9 +231,9 @@ mouseClicked = () => {
 
   if (hhmmss) {
   } else {
-    endOfTheWorld();
-  // pickACamera();
-  // generateSolarSystem();
+    // endOfTheWorld();
+    // pickACamera();
+    // generateSolarSystem();
   }
 }
 
