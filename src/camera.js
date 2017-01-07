@@ -12,6 +12,7 @@ var zoomAnimation;
 zoomTo = (newScale, duration, easing) => {
   // console.log("New scale : " + newScale);
   if (zoomAnimation) {
+    zoomAnimation.seek(100);
     zoomAnimation.pause();
   }
   zoomAnimation = anime({
@@ -51,7 +52,8 @@ getMatchingZoom = (realDistance, screenDistance) => {
 }
 
 
-watchPlanetGoBy = (planet) => {
+watchPlanetGoBy = (planet, aniDuration) => {
+  aniDuration = typeof aniDuration !== 'undefined' ? aniDuration : 4000;
 
   // Follow the star, but preserving our camera
   planetToFollow = planet.celestialParent;
@@ -69,30 +71,35 @@ watchPlanetGoBy = (planet) => {
     newScale = getMatchingZoom(planet.satellite.orbitRadius, width);
     newScale *= 1 + Math.random() * 1.2;
   }
-  zoomTo(newScale, 2000, "easeInOutQuad");
+  zoomTo(newScale, aniDuration, "easeInOutQuad");
 }
 
 
 
 
-followPlanet = (planet) => {
+followPlanet = (planet, aniDuration) => {
+  aniDuration = typeof aniDuration !== 'undefined' ? aniDuration : 4000;
   planetToFollow = planet;
   let cameraOffsetX = (Math.random() - 0.5) * width / 8;
   let cameraOffsetY = (Math.random() - 0.5) * height / 8;
   moveTo(cameraOffsetX, cameraOffsetY, 2000, "easeInOutQuad");
 
   let newScale = 1 + Math.random() * 5;
-  zoomTo(newScale, 2000, "easeInOutQuad");
+  zoomTo(newScale, aniDuration, "easeInOutQuad");
 }
 
 
 
 var zoomStep = 1.03;
 mouseWheel = (event) => {
+  if (!event.delta) {
+    return false;
+  }
   // Trackpad scroll can cause animation conflict -> Re-init
   if (!currentScale) {
     currentScale = 2;
   }
+  console.log(event.delta);
   // Calculate the newScale from the delta of scroll
   let newScale;
   if (event.delta > 0 && currentScale > 0.1) {
@@ -146,7 +153,7 @@ goToCenter = (alignDuration) => {
 
   let newScale = getMatchingZoom(
     (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius) * (1.1 + 0.4 * Math.random()),
-    Math.max(width, height)
+    Math.min(width, height)
   );
   zoomTo(newScale, alignDuration, "easeInOutSine");
 }
@@ -162,7 +169,11 @@ endOfTheWorld = () => {
   let alignDuration = 6000;
   let crashDuration = 16500;
   // First align everything
-  goToCenter(alignDuration);
+  if (Math.random() < 0.3) {
+    followPlanet(star.satellite, alignDuration);
+  } else {
+    goToCenter(alignDuration);
+  }
   // Everything crashes
   var ani1 = anime({
     targets: star.satellite,
@@ -194,9 +205,10 @@ endOfTheWorld = () => {
       // Zoom out from the center
       let newScale = getMatchingZoom(
         (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius),
-        Math.max(width, height)
+        Math.min(width, height)
       );
       let zoomOutDuration = 10000;
+      moveTo(0, 0, 2000, "easeInOutSine");
       zoomTo(newScale, zoomOutDuration, "easeOutSine");
       // Go back to normal camera mode after zooming out.
       window.setTimeout(function() {
@@ -219,9 +231,9 @@ mouseClicked = () => {
 
   if (hhmmss) {
   } else {
-    // endOfTheWorld();
-    // pickACamera();
-    // generateSolarSystem();
+    endOfTheWorld();
+  // pickACamera();
+  // generateSolarSystem();
   }
 }
 

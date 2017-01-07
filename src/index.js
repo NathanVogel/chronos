@@ -524,7 +524,7 @@ drawOvershadow = function(radius, angle) {
 
 drawProjectedshadow = function(radius, angle) {
   let ratio = star.satellite.orbitRadius / star.radius;
-  let alpha = Math.min(0.33, ratio - star.sunRatio);
+  let alpha = Math.min(0.55, ratio - star.sunRatio);
   if (alpha < 0) {
     alpha = 0;
   }
