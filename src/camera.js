@@ -150,7 +150,7 @@ goToCenter = (alignDuration) => {
 
 var endingTheWorld = false;
 endOfTheWorld = () => {
-  let endSpeed = 0.2;
+  let endSpeed = 0.8;
   // Can't double end a world
   if (endingTheWorld) {
     return;
