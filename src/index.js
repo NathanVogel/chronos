@@ -1,12 +1,12 @@
 var hhmmss = null;
-// hhmmss = new HHMMSS({
-//   type: "horizontal",
-//   horizontalAlign: "hcenter",
-//   verticalAlign: "vcenter",
-//   size: "small",
-//   invert: true,
-//   sleepTime: 1000
-// });
+hhmmss = new HHMMSS({
+  type: "horizontal",
+  horizontalAlign: "hcenter",
+  verticalAlign: "vcenter",
+  size: "small",
+  invert: true,
+  sleepTime: 1000
+});
 if (hhmmss) {
   hhmmss.getTime = function() {
     return (((hhmmss.getH() * 60 + hhmmss.getM()) * 60) + hhmmss.getS()) * 1000;
@@ -642,4 +642,5 @@ draw = () => {
       pickACamera();
     }
   }
+  console.log(currentScale);
 }

@@ -10,16 +10,22 @@ var cameraOffset = {
 
 var zoomAnimation;
 zoomTo = (newScale, duration, easing) => {
-  // console.log("New scale : " + newScale);
+  // console.log("Zoom from " + currentScale + " to " + newScale);
+  // Stop the last animation
   if (zoomAnimation) {
+    let tmpScale = currentScale;
     zoomAnimation.seek(100);
     zoomAnimation.pause();
+    currentScale = tmpScale;
   }
   zoomAnimation = anime({
     targets: this,
     currentScale: newScale,
     duration: duration,
-    easing: easing
+    easing: easing,
+    update: function() {
+      console.log("Current : " + currentScale);
+    }
   });
 }
 
@@ -90,28 +96,6 @@ followPlanet = (planet, aniDuration) => {
 
 
 
-var zoomStep = 1.03;
-mouseWheel = (event) => {
-  if (!event.delta) {
-    return false;
-  }
-  // Trackpad scroll can cause animation conflict -> Re-init
-  if (!currentScale) {
-    currentScale = 2;
-  }
-  console.log(event.delta);
-  // Calculate the newScale from the delta of scroll
-  let newScale;
-  if (event.delta > 0 && currentScale > 0.1) {
-    newScale = currentScale / (zoomStep + event.delta / 100);
-  } else if (event.delta < 0 && currentScale < 100) {
-    newScale = currentScale * (zoomStep - event.delta / 100);
-  }
-  // Zoom to that scale.
-  zoomTo(newScale, 300, "easeOutQuad");
-  return false;
-}
-
 justChangedCamera = () => {
   lastCameraPick = new Date(Math.floor((new Date()).getTime() / cameraFrequency) * cameraFrequency).getTime()
   if (hhmmss) {
@@ -119,12 +103,16 @@ justChangedCamera = () => {
   }
 }
 
+
+
 justEndedTheWorld = () => {
   lastEndOfTheWorld = new Date(Math.floor((new Date()).getTime() / endOfTheWorldFrequency) * endOfTheWorldFrequency).getTime()
   if (hhmmss) {
     lastEndOfTheWorld = Math.floor(hhmmss.getTime() / endOfTheWorldFrequency) * endOfTheWorldFrequency;
   }
 }
+
+
 
 pickACamera = () => {
   // Pick a random planet.
@@ -158,16 +146,19 @@ goToCenter = (alignDuration) => {
   zoomTo(newScale, alignDuration, "easeInOutSine");
 }
 
+
+
 var endingTheWorld = false;
 endOfTheWorld = () => {
+  let endSpeed = 0.2;
   // Can't double end a world
   if (endingTheWorld) {
     return;
   }
   endingTheWorld = true;
 
-  let alignDuration = 6000;
-  let crashDuration = 16500;
+  let alignDuration = 6000 * endSpeed;
+  let crashDuration = 16500 * endSpeed;
   // First align everything
   if (Math.random() < 0.3) {
     followPlanet(star.satellite, alignDuration);
@@ -195,7 +186,7 @@ endOfTheWorld = () => {
     radius: Math.max(width, height) / star.sunRatio,
     easing: "easeInExpo",
     delay: alignDuration + 0.2 * crashDuration,
-    duration: 22000,
+    duration: 22000 * endSpeed,
     complete: function() {
       console.log("done bigger");
       // Zoom to the core of the star
@@ -207,8 +198,8 @@ endOfTheWorld = () => {
         (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius),
         Math.min(width, height)
       );
-      let zoomOutDuration = 10000;
-      moveTo(0, 0, 2000, "easeInOutSine");
+      let zoomOutDuration = 10000 * endSpeed;
+      moveTo(0, 0, 2000 * endSpeed, "easeInOutSine");
       zoomTo(newScale, zoomOutDuration, "easeOutSine");
       // Go back to normal camera mode after zooming out.
       window.setTimeout(function() {
@@ -220,6 +211,8 @@ endOfTheWorld = () => {
   });
 }
 
+
+
 mouseClicked = () => {
   // Chain cameras
   // if (planetToFollow.satellite) {
@@ -228,13 +221,57 @@ mouseClicked = () => {
   //   watchPlanetGoBy(star.satellite);
   // }
 
-
   if (hhmmss) {
   } else {
     // endOfTheWorld();
     // pickACamera();
     // generateSolarSystem();
   }
+}
+
+
+function keyPressed() {
+  if (key == 'G') {
+    console.log("G");
+    generateSolarSystem();
+    let newScale = getMatchingZoom(
+      (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius),
+      Math.min(width, height)
+    );
+    // Zoom to the core of the star
+    moveTo(0, 0, 1000, "easeInOutSine");
+    zoomTo(newScale, 1000, "easeOutSine");
+  } else if (key == 'E') {
+    endOfTheWorld();
+  } else if (key == 'C') {
+    pickACamera();
+  }
+}
+
+
+
+var zoomStep = 1.03;
+mouseWheel = (event) => {
+  return;
+
+  if (!event.delta) {
+    return false;
+  }
+  // Trackpad scroll can cause animation conflict -> Re-init
+  if (!currentScale) {
+    currentScale = 2;
+  }
+  console.log(event.delta);
+  // Calculate the newScale from the delta of scroll
+  let newScale;
+  if (event.delta > 0 && currentScale > 0.1) {
+    newScale = currentScale / (zoomStep + event.delta / 100);
+  } else if (event.delta < 0 && currentScale < 100) {
+    newScale = currentScale * (zoomStep - event.delta / 100);
+  }
+  // Zoom to that scale.
+  zoomTo(newScale, 300, "easeOutQuad");
+  return false;
 }
 
 
