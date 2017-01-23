@@ -52,7 +52,7 @@ var backgroundColor;
 var systemDensity = 1; // Per 100x100 pixels surface at origin depth
 var systemSkyDistance = 100;
 var stars = [];
-var currentScale = 3;
+var currentScale = 1;
 var maxSystemSpan,
   systemSizeX,
   ystemSizeY,
@@ -71,8 +71,6 @@ function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   backgroundColor = color(14);
 
-  // Note : better to stay at small size, not sure why anymore (only in 3D ?)
-
 
   // ====== SOLAR SYSTEM =======
 
@@ -85,48 +83,17 @@ function setup() {
   planetMask.smooth();
   planetMask.loadPixels();
 
-  // Jpeg version :
-  // var star = new Planet(null, drawImageSun, getNoAngle, 100, 0, null);
-  // star.satellite = new Planet(null, drawImageJupiter, getMinutesAngle, 40, 240, star);
-  // star.satellite.satellite = new Planet(null, drawImageMoon, getSecondsAngle, 20, 100, star.satellite);
-  // star.satellite.satellite.satellite = new Planet(null, drawSatellite, getMillisAngle, 2, 25,
-  //   star.satellite.satellite
-  // );
-
-
   generateSolarSystem();
 
+
   // ====== SKY ======
-
-  systemDensity = 1; // Per 100x100 pixels surface at origin depth
-  systemSkyDistance = 100;
-
-  maxSystemSpan = getSystemSpan(star);
-  systemSizeX = maxSystemSpan * 5;
-  systemSizeY = systemSizeX;
-  systemStarCount = (systemSizeX * systemSizeY / (100 * 100)) * systemDensity;
-  console.log("Star count : " + systemStarCount);
-  if (systemStarCount > 700) {
-    systemStarCount = 700;
-  }
-
-  for (let i = 0; i < systemStarCount; i++) {
-    stars.push(new Star(
-      Math.random() * systemSizeX - systemSizeX / 2,
-      Math.random() * systemSizeY - systemSizeY / 2,
-      Math.random() * -systemSkyDistance * systemDensity - systemSkyDistance,
-      Math.random() * 3)
-    );
-  }
+  createStarrySky();
 
   // ====== CAMERA ======
-
   currentScale = 1;
-  pickACamera();
-
+  // pickACamera();
 
   // ====== SETUP ======
-
   imageMode(CENTER);
   rectMode(CENTER);
   ellipseMode(CENTER);
@@ -138,6 +105,16 @@ function setup() {
 // ======= SOLAR SYSTEM ======
 
 generateSolarSystem = () => {
+  // Jpeg version :
+  // var star = new Planet(null, drawImageSun, getNoAngle, 100, 0, null);
+  // star.satellite = new Planet(null, drawImageJupiter, getMinutesAngle, 40, 240, star);
+  // star.satellite.satellite = new Planet(null, drawImageMoon, getSecondsAngle, 20, 100, star.satellite);
+  // star.satellite.satellite.satellite = new Planet(null, drawSatellite, getMillisAngle, 2, 25,
+  //   star.satellite.satellite
+  // );
+
+  // Note : better to stay at small size, not sure why anymore (only in 3D ?)
+
   // The radius contains the halo
   let starRadius = 300 + Math.random() * 200;
   let planetRadius = 30 + Math.random() * 50;
@@ -180,6 +157,7 @@ draw = () => {
 
   // Move our camera
   if (planetToFollow) {
+    // console.log("CURRENT : " + currentScale);
     camera.zoom = currentScale;
     camera.position.x = planetToFollow.position.x + Number(cameraOffset.x);
     camera.position.y = planetToFollow.position.y + Number(cameraOffset.y);
@@ -187,9 +165,7 @@ draw = () => {
   }
 
   // Draw the sky
-  for (let i = 0; i < stars.length; i++) {
-    stars[i].update();
-  }
+  updateStarrySky();
 
   // We can now draw the planets
 

@@ -24,7 +24,7 @@ zoomTo = (newScale, duration, easing) => {
     duration: duration,
     easing: easing,
     update: function() {
-      // console.log("Current : " + currentScale);
+      console.log("Current : " + currentScale);
     }
   });
 }
@@ -251,7 +251,7 @@ function keyPressed() {
 
 var zoomStep = 1.03;
 mouseWheel = (event) => {
-  return;
+  // return;
 
   if (!event.delta) {
     return false;
@@ -267,6 +267,7 @@ mouseWheel = (event) => {
   } else if (event.delta < 0 && currentScale < 100) {
     newScale = currentScale * (zoomStep - event.delta / 100);
   }
+  console.log("new : " + newScale);
   // Zoom to that scale.
   zoomTo(newScale, 300, "easeOutQuad");
   return false;
@@ -280,6 +281,6 @@ mouseDragged = (event) => {
     return;
   }
 
-  cameraOffset.x = Number(cameraOffset.x) + (pmouseX - mouseX) / currentScale;
-  cameraOffset.y = Number(cameraOffset.y) + (pmouseY - mouseY) / currentScale;
+  cameraOffset.x = Number(cameraOffset.x) + (pmouseX - mouseX) / currentScale * 0.2;
+  cameraOffset.y = Number(cameraOffset.y) + (pmouseY - mouseY) / currentScale * 0.2;
 }
