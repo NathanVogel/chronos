@@ -24,7 +24,7 @@ zoomTo = (newScale, duration, easing) => {
     duration: duration,
     easing: easing,
     update: function() {
-      console.log("Current : " + currentScale);
+      // console.log("Current : " + currentScale);
     }
   });
 }
@@ -232,7 +232,6 @@ mouseClicked = () => {
 
 function keyPressed() {
   if (key == 'G') {
-    console.log("G");
     generateSolarSystem();
     let newScale = getMatchingZoom(
       (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius),
@@ -261,7 +260,6 @@ mouseWheel = (event) => {
   if (!currentScale) {
     currentScale = 2;
   }
-  console.log(event.delta);
   // Calculate the newScale from the delta of scroll
   let newScale;
   if (event.delta > 0 && currentScale > 0.1) {
