@@ -41,7 +41,7 @@ createStarrySky = () => {
     stars.push(new Star(
       Math.random() * (width + zmax),
       Math.random() * (height + zmax),
-      2 + Math.random() * zmax,
+      4 + Math.random() * zmax,
       Math.random() * 3)
     );
   }

@@ -61,7 +61,7 @@ getMatchingZoom = (realDistance, screenDistance) => {
 watchPlanetGoBy = (planet, aniDuration) => {
   aniDuration = typeof aniDuration !== 'undefined' ? aniDuration : 4000;
 
-  // Follow the star, but preserving our camera
+  // Follow the star, preserving our camera
   planetToFollow = planet.celestialParent;
   let isSeconds = (planet.getAngle === getSecondsAngle)
 
@@ -70,11 +70,11 @@ watchPlanetGoBy = (planet, aniDuration) => {
   let cameraOffsetX = Math.sin(planet.getAngle() - radians(degreesAdvance)) * planet.orbitRadius;
   let cameraOffsetY = Math.cos(planet.getAngle() - radians(degreesAdvance)) * planet.orbitRadius;
 
-  moveTo(cameraOffsetX, cameraOffsetY, 1000, "easeInOutQuad");
+  moveTo(cameraOffsetX, cameraOffsetY, aniDuration, "easeInOutQuad");
 
   let newScale = 1 + Math.random() * 5
   if (!isSeconds) {
-    newScale = getMatchingZoom(planet.satellite.orbitRadius, width);
+    newScale = getMatchingZoom(planet.satellite.orbitRadius, Math.min(width, height));
     newScale *= 1 + Math.random() * 1.2;
   }
   zoomTo(newScale, aniDuration, "easeInOutQuad");
@@ -88,7 +88,7 @@ followPlanet = (planet, aniDuration) => {
   planetToFollow = planet;
   let cameraOffsetX = (Math.random() - 0.5) * width / 8;
   let cameraOffsetY = (Math.random() - 0.5) * height / 8;
-  moveTo(cameraOffsetX, cameraOffsetY, 2000, "easeInOutQuad");
+  moveTo(cameraOffsetX, cameraOffsetY, aniDuration, "easeInOutQuad");
 
   let newScale = 1 + Math.random() * 5;
   zoomTo(newScale, aniDuration, "easeInOutQuad");
@@ -249,6 +249,8 @@ function keyPressed() {
   } else if (key == 'W') {
     worldTransition.inProgress = true;
     worldTransition.dezooming = true;
+    planetToFollow = star;
+    moveTo(0, 0, 3000, "easeInOutQuad");
   }
 }
 
