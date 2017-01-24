@@ -8,27 +8,37 @@ getNoAngle = () => {
   return 0;
 }
 
+getProgressionOfCurrentSecond = () => {
+  return ((hhmmss) ? hhmmss.getMillis() : new Date().getMilliseconds()) / 1000;
+}
+
 getMillisAngle = () => {
-  let millis = (hhmmss) ? hhmmss.getMillis() : new Date().getMilliseconds();
-  let a = ((1 - (millis / 1000)) * TWO_PI) + PI;
+  let a = ((1 - (getProgressionOfCurrentSecond())) * TWO_PI) + PI;
   return a;
+}
+
+
+getProgressionOfCurrentMinute = () => {
+  return ((hhmmss) ? hhmmss.getS() : new Date().getSeconds()) / 60 + getProgressionOfCurrentSecond() / 60 ;
 }
 
 getSecondsAngle = () => {
-  let seconds = (hhmmss) ? hhmmss.getS() : new Date().getSeconds();
-  let a = ((1 - (seconds / 60)) * TWO_PI);
-  a += ((getMillisAngle() ) / 60);
+  let a = ((1 - getProgressionOfCurrentMinute())) * TWO_PI;
   a += PI;
   return a;
 }
 
+
+getProgressionOfCurrentHour = () => {
+  return ((hhmmss) ? hhmmss.getM() : new Date().getMinutes()) / 60 + getProgressionOfCurrentMinute() / 60 ;
+}
+
 getMinutesAngle = () => {
-  let minutes = (hhmmss) ? hhmmss.getM() : new Date().getMinutes();
-  let a = ((1 - (minutes / 60)) * TWO_PI);
-  a += ((getSecondsAngle() ) / 60);
+  let a = ((1 - getProgressionOfCurrentHour())) * TWO_PI;
   a += PI;
   return a;
 }
+
 
 // Returns the angle that the shadow must be rotated to.
 angleToStar = function(planet) {

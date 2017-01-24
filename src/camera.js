@@ -24,7 +24,7 @@ zoomTo = (newScale, duration, easing) => {
     duration: duration,
     easing: easing,
     update: function() {
-      console.log("Current : " + currentScale);
+      // console.log("Current : " + currentScale);
     }
   });
 }
