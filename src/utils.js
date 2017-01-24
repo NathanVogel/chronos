@@ -19,7 +19,7 @@ getMillisAngle = () => {
 
 
 getProgressionOfCurrentMinute = () => {
-  return ((hhmmss) ? hhmmss.getS() : new Date().getSeconds()) / 60 + getProgressionOfCurrentSecond() / 60 ;
+  return (((hhmmss) ? hhmmss.getS() : new Date().getSeconds()) + getProgressionOfCurrentSecond()) / 60 ;
 }
 
 getSecondsAngle = () => {
@@ -30,12 +30,13 @@ getSecondsAngle = () => {
 
 
 getProgressionOfCurrentHour = () => {
-  return ((hhmmss) ? hhmmss.getM() : new Date().getMinutes()) / 60 + getProgressionOfCurrentMinute() / 60 ;
+  // console.log("S : " + hhmmss.getS() + " vs. " + hhmmss.getMillis());
+  return (((hhmmss) ? hhmmss.getM() : new Date().getMinutes()) + getProgressionOfCurrentMinute()) / 60;
 }
 
 getMinutesAngle = () => {
   let a = ((1 - getProgressionOfCurrentHour())) * TWO_PI;
-  a += PI;
+  a -=  PI;
   return a;
 }
 

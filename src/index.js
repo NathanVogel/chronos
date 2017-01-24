@@ -23,7 +23,7 @@ var img_jupiter,
   img_shadow;
 
 // Change camera every 5 minutes.
-var cameraFrequency = 1000 * 60 * 5;
+var cameraFrequency = 1000 * 60 * 3;
 var lastCameraPick;
 justChangedCamera();
 // var lastCameraPick = new Date(Math.floor((new Date()).getTime() / cameraFrequency) * cameraFrequency).getTime();
@@ -49,8 +49,6 @@ function preload() {
 var star,
   planetToFollow;
 var backgroundColor;
-var systemDensity = 1; // Per 100x100 pixels surface at origin depth
-var systemSkyDistance = 100;
 var stars = [];
 var currentScale = 1;
 var maxSystemSpan,
@@ -129,6 +127,11 @@ generateSolarSystem = () => {
     star.satellite.satellite
   );
   planetToFollow = star;
+
+  // Calculate the size of the system to draw to shadows that aren't infinite
+  maxSystemSpan = getSystemSpan(star);
+  systemSizeX = maxSystemSpan * 5;
+  systemSizeY = systemSizeX;
 }
 
 
@@ -165,27 +168,31 @@ draw = () => {
   }
 
   // Draw the sky
+  camera.off();
   updateStarrySky();
+  camera.on();
 
   // We can now draw the planets
 
-  // Star to satllite (above)
-  // currentPlanet = star;
-  // while (currentPlanet) {
-  //   currentPlanet.updateDrawing();
-  //   currentPlanet = currentPlanet.satellite;
-  // }
+  if (!worldTransition.wandering) {
+    // Star to satllite (above)
+    // currentPlanet = star;
+    // while (currentPlanet) {
+    //   currentPlanet.updateDrawing();
+    //   currentPlanet = currentPlanet.satellite;
+    // }
 
-  // Satellite to star (above)
-  currentPlanet = star;
-  // find the last satellite
-  while (currentPlanet.satellite) {
-    currentPlanet = currentPlanet.satellite;
-  }
-  // draw everything from here.
-  while (currentPlanet) {
-    currentPlanet.updateDrawing();
-    currentPlanet = currentPlanet.celestialParent;
+    // Satellite to star (above)
+    currentPlanet = star;
+    // find the last satellite
+    while (currentPlanet.satellite) {
+      currentPlanet = currentPlanet.satellite;
+    }
+    // draw everything from here.
+    while (currentPlanet) {
+      currentPlanet.updateDrawing();
+      currentPlanet = currentPlanet.celestialParent;
+    }
   }
 
   // ====== EVENTS =======
@@ -210,7 +217,7 @@ draw = () => {
         pickACamera();
       }
     }
-    // hhmmss.updateTime();
+  // hhmmss.updateTime();
   }
   // Regular event handling without hhmmss
   else if (!endingTheWorld) {

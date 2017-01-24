@@ -211,6 +211,8 @@ drawProjectedshadow = function(radius, angle) {
   if (alpha < 0) {
     alpha = 0;
   }
+  // Make the shadow disappear while unzooming
+  alpha *= constrain(map(currentScale, 0.1, 0.5, 0, 1), 0, 1);
 
   push();
   rotate(angle);

@@ -140,8 +140,9 @@ goToCenter = (alignDuration) => {
   moveTo(0, 0, alignDuration, "easeInOutSine");
 
   let newScale = getMatchingZoom(
+    Math.min(width, height),
     (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius) * (1.1 + 0.4 * Math.random()),
-    Math.min(width, height)
+      Math.min(width, height)
   );
   zoomTo(newScale, alignDuration, "easeInOutSine");
 }
@@ -150,7 +151,7 @@ goToCenter = (alignDuration) => {
 
 var endingTheWorld = false;
 endOfTheWorld = () => {
-  let endSpeed = 0.8;
+  let endSpeed = 0.5;
   // Can't double end a world
   if (endingTheWorld) {
     return;
@@ -195,7 +196,7 @@ endOfTheWorld = () => {
       generateSolarSystem();
       // Zoom out from the center
       let newScale = getMatchingZoom(
-        (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius),
+        (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius) * 2,
         Math.min(width, height)
       );
       let zoomOutDuration = 10000 * endSpeed;
@@ -233,8 +234,9 @@ mouseClicked = () => {
 function keyPressed() {
   if (key == 'G') {
     generateSolarSystem();
+    createStarrySky();
     let newScale = getMatchingZoom(
-      (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius),
+      (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius) * 2.1,
       Math.min(width, height)
     );
     // Zoom to the core of the star
@@ -244,6 +246,9 @@ function keyPressed() {
     endOfTheWorld();
   } else if (key == 'C') {
     pickACamera();
+  } else if (key == 'W') {
+    worldTransition.inProgress = true;
+    worldTransition.dezooming = true;
   }
 }
 
@@ -281,6 +286,6 @@ mouseDragged = (event) => {
     return;
   }
 
-  cameraOffset.x = Number(cameraOffset.x) + (pmouseX - mouseX) / currentScale * 0.2;
-  cameraOffset.y = Number(cameraOffset.y) + (pmouseY - mouseY) / currentScale * 0.2;
+  cameraOffset.x = Number(cameraOffset.x) + (pmouseX - mouseX) / currentScale * 0.4;
+  cameraOffset.y = Number(cameraOffset.y) + (pmouseY - mouseY) / currentScale * 0.4;
 }
