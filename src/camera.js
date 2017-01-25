@@ -142,7 +142,7 @@ goToCenter = (alignDuration) => {
   let newScale = getMatchingZoom(
     Math.min(width, height),
     (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius) * (1.1 + 0.4 * Math.random()),
-      Math.min(width, height)
+    Math.min(width, height)
   );
   zoomTo(newScale, alignDuration, "easeInOutSine");
 }
@@ -247,10 +247,12 @@ function keyPressed() {
   } else if (key == 'C') {
     pickACamera();
   } else if (key == 'W') {
+    startWorldTransition();
+  } else if (key == 'M') {
     worldTransition.inProgress = true;
-    worldTransition.dezooming = true;
     planetToFollow = star;
-    moveTo(0, 0, 3000, "easeInOutQuad");
+    moveTo(0, 0, 100, "easeInOutQuad");
+    startWandering();
   }
 }
 

@@ -1,12 +1,12 @@
 var hhmmss = null;
-hhmmss = new HHMMSS({
-  type: "horizontal",
-  horizontalAlign: "hcenter",
-  verticalAlign: "vcenter",
-  size: "small",
-  invert: true,
-  sleepTime: 1000
-});
+// hhmmss = new HHMMSS({
+//   type: "horizontal",
+//   horizontalAlign: "hcenter",
+//   verticalAlign: "vcenter",
+//   size: "small",
+//   invert: true,
+//   sleepTime: 1000
+// });
 if (hhmmss) {
   hhmmss.getTime = function() {
     return (((hhmmss.getH() * 60 + hhmmss.getM()) * 60) + hhmmss.getS()) * 1000;
@@ -26,10 +26,6 @@ var img_jupiter,
 var cameraFrequency = 1000 * 60 * 3;
 var lastCameraPick;
 justChangedCamera();
-// var lastCameraPick = new Date(Math.floor((new Date()).getTime() / cameraFrequency) * cameraFrequency).getTime();
-// if (hhmmss) {
-//   lastCameraPick = Math.floor(hhmmss.getTime() / cameraFrequency) * cameraFrequency;
-// }
 
 // Change world every hour.
 var endOfTheWorldFrequency = 1000 * 60 * 60;
@@ -39,10 +35,6 @@ justEndedTheWorld();
 
 function preload() {
   img_shadow = loadImage("img/shadow.png");
-// img_jupiter = loadImage("img/jupiter-transparent.png");
-// img_moon = loadImage("img/moon.png");
-// img_mars = loadImage("img/marsmap1k.jpg");
-// img_sun = loadImage("img/sun.png");
 }
 
 
@@ -174,7 +166,8 @@ draw = () => {
 
   // We can now draw the planets
 
-  if (!worldTransition.wandering) {
+  if ((!worldTransition.wandering && !worldTransition.wanderingBack)
+    || worldTransition.rezooming) {
     // Star to satllite (above)
     // currentPlanet = star;
     // while (currentPlanet) {
