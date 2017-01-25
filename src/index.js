@@ -20,7 +20,8 @@ var img_jupiter,
   img_sun,
   img_mars,
   img_moon,
-  img_shadow;
+  img_shadow,
+  img_mask;
 
 // Change camera every 5 minutes.
 var cameraFrequency = 1000 * 60 * 3;
@@ -35,6 +36,7 @@ justEndedTheWorld();
 
 function preload() {
   img_shadow = loadImage("img/shadow.png");
+  img_mask = loadImage("img/mask1000.png");
 }
 
 
@@ -65,12 +67,16 @@ function setup() {
   // ====== SOLAR SYSTEM =======
 
   planetMask = createGraphics(planetResolution, planetResolution);
-  planetMask.noStroke();
-  planetMask.fill(color('white'));
-  planetMask.smooth();
-  planetMask.ellipseMode(CENTER);
-  planetMask.ellipse(planetResolution / 2, planetResolution / 2, planetResolution, planetResolution);
-  planetMask.smooth();
+  if (planetResolution == 1000) {
+    planetMask.image(img_mask, 0, 0);
+  } else {
+    planetMask.noStroke();
+    planetMask.fill(color('white'));
+    planetMask.smooth();
+    planetMask.ellipseMode(CENTER);
+    planetMask.ellipse(planetResolution / 2, planetResolution / 2, planetResolution, planetResolution);
+    planetMask.smooth();
+  }
   planetMask.loadPixels();
 
   generateSolarSystem();
@@ -196,7 +202,7 @@ draw = () => {
       if (hhmmss.getTime() < lastCameraPick) {
         justChangedCamera();
       }
-      
+
       // Check for end of the world
       if (hhmmss.getTime() - lastEndOfTheWorld > endOfTheWorldFrequency) {
         startWorldTransition();
