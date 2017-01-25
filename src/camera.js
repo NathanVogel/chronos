@@ -59,7 +59,7 @@ getMatchingZoom = (realDistance, screenDistance) => {
 
 
 watchPlanetGoBy = (planet, aniDuration) => {
-  aniDuration = typeof aniDuration !== 'undefined' ? aniDuration : 4000;
+  aniDuration = typeof aniDuration !== 'undefined' ? aniDuration : 6000;
 
   // Follow the star, preserving our camera
   planetToFollow = planet.celestialParent;
@@ -84,7 +84,7 @@ watchPlanetGoBy = (planet, aniDuration) => {
 
 
 followPlanet = (planet, aniDuration) => {
-  aniDuration = typeof aniDuration !== 'undefined' ? aniDuration : 4000;
+  aniDuration = typeof aniDuration !== 'undefined' ? aniDuration : 6000;
   planetToFollow = planet;
   let cameraOffsetX = (Math.random() - 0.5) * width / 8;
   let cameraOffsetY = (Math.random() - 0.5) * height / 8;
@@ -214,22 +214,6 @@ endOfTheWorld = () => {
 
 
 
-mouseClicked = () => {
-  // Chain cameras
-  // if (planetToFollow.satellite) {
-  //   followPlanet(planetToFollow.satellite);
-  // } else {
-  //   watchPlanetGoBy(star.satellite);
-  // }
-
-  if (hhmmss) {
-  } else {
-    // endOfTheWorld();
-    // pickACamera();
-    // generateSolarSystem();
-  }
-}
-
 
 function keyPressed() {
   if (key == 'G') {
@@ -248,11 +232,12 @@ function keyPressed() {
     pickACamera();
   } else if (key == 'W') {
     startWorldTransition();
-  } else if (key == 'M') {
-    worldTransition.inProgress = true;
-    planetToFollow = star;
-    moveTo(0, 0, 100, "easeInOutQuad");
-    startWandering();
+  } else if (key == 'K') {
+    // Kill HHMMSS
+    hhmmss = null;
+    // Update the dates to avoid triggering (not the same format)
+    justEndedTheWorld();
+    justChangedCamera();
   }
 }
 

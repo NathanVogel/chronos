@@ -6,6 +6,7 @@ class Star {
     this.setRandomValues();
   }
 
+  // Initialize the star on the screen.
   setRandomValues() {
     let zmax = 80;
     this.x = Math.random() * (width);
@@ -14,6 +15,8 @@ class Star {
     this.intensity = Math.random() * 3;
   }
 
+  // Calculate the x;y position of the star
+  // only used for the transitions between worlds.
   update() {
     // Calculate the position relative to the direction center
     let fromCenterX = this.x - worldTransition.direction.x;
@@ -35,26 +38,10 @@ class Star {
   }
 
   draw() {
-    // ellipse(
-    //   this.x * camera.zoom + camera.position.x + camera.position.x / this.z,
-    //   this.y * camera.zoom + camera.position.y + camera.position.y / this.z,
-    //   this.intensity / (camera.zoom * 3));
-    // if (worldTransition.wandering) {
-    // console.log(this.x / this.dynamicZ);
-    // var sx = map(this.x / this.dynamicZ, 0, 1, -width/2, width/2);
-    // var sy = map(this.y / this.dynamicZ, 0, 1, -height/2, height/2);
-    // var r = map(this.dynamicZ, 0, width, this.intensity*2, 0);
-    // ellipse(sx, sy, r);
-
-    //   ellipse(this.x, this.y, this.intensity);
-    //
-    // } else {
-    let w = worldTransition.wanderingBack;
     ellipse(
       this.x + camera.position.x / this.z,
       this.y + camera.position.y / this.z,
       this.intensity);
-  // }
   }
 }
 
@@ -86,6 +73,8 @@ var worldTransition = {
 }
 
 startWorldTransition = () => {
+  justChangedCamera();
+  justEndedTheWorld();
   worldTransition.inProgress = true;
   worldTransition.dezooming = true;
   worldTransition.wandering = false;
@@ -140,6 +129,8 @@ stopWandering = () => {
 }
 
 
+// Manages the animations of the stars and transitions between worlds.
+// Called every frame from draw()
 updateStarrySky = () => {
   if (worldTransition.inProgress) {
     // Dezoom out of the currentSystem
@@ -156,19 +147,18 @@ updateStarrySky = () => {
         stars[i].update();
       }
       if (worldTransition.wandering) {
-        worldTransition.direction.x = width / 2 + map(noise(0, frameCount / 70), 0, 1, -400, +400);
-        worldTransition.direction.y = height / 2 + map(noise(100, frameCount / 70), 0, 1, -400, +400);
+        worldTransition.direction.x = width / 2 + map(noise(0, frameCount / 70), 0, 1, -width/2, width/2);
+        worldTransition.direction.y = height / 2 + map(noise(100, frameCount / 70), 0, 1, -height/2, height/2);
         fill(255, 0, 0);
       // ellipse(worldTransition.direction.x, worldTransition.direction.y, 5);
       }
     }
     // Rezoom into
     if (worldTransition.rezooming) {
+      // The rezoom factor doesn't need to be animated,
+      // since no smooth transition is required.
+      // Beginning : it's a pixel. End : we directly start pickACamera
       currentScale *= 1 + 0.01;
-      // if (currentScale > 0.5 && !worldTransition.rezoomingAlongCamera) {
-      //   worldTransition.rezoomingAlongCamera = true;
-      //   pickACamera();
-      // }
       if (currentScale > 1) {
         pickACamera();
         worldTransition.rezoomingAlongCamera = false;

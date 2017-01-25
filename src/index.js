@@ -1,12 +1,12 @@
 var hhmmss = null;
-// hhmmss = new HHMMSS({
-//   type: "horizontal",
-//   horizontalAlign: "hcenter",
-//   verticalAlign: "vcenter",
-//   size: "small",
-//   invert: true,
-//   sleepTime: 1000
-// });
+hhmmss = new HHMMSS({
+  type: "horizontal",
+  horizontalAlign: "hcenter",
+  verticalAlign: "vcenter",
+  size: "small",
+  invert: true,
+  sleepTime: 1000
+});
 if (hhmmss) {
   hhmmss.getTime = function() {
     return (((hhmmss.getH() * 60 + hhmmss.getM()) * 60) + hhmmss.getS()) * 1000;
@@ -80,8 +80,11 @@ function setup() {
   createStarrySky();
 
   // ====== CAMERA ======
-  currentScale = 1;
-  // pickACamera();
+  currentScale = getMatchingZoom(
+    (star.satellite.orbitRadius + star.satellite.satellite.orbitRadius) * 2.1,
+    Math.min(width, height)
+  );
+  pickACamera();
 
   // ====== SETUP ======
   imageMode(CENTER);
@@ -95,13 +98,6 @@ function setup() {
 // ======= SOLAR SYSTEM ======
 
 generateSolarSystem = () => {
-  // Jpeg version :
-  // var star = new Planet(null, drawImageSun, getNoAngle, 100, 0, null);
-  // star.satellite = new Planet(null, drawImageJupiter, getMinutesAngle, 40, 240, star);
-  // star.satellite.satellite = new Planet(null, drawImageMoon, getSecondsAngle, 20, 100, star.satellite);
-  // star.satellite.satellite.satellite = new Planet(null, drawSatellite, getMillisAngle, 2, 25,
-  //   star.satellite.satellite
-  // );
 
   // Note : better to stay at small size, not sure why anymore (only in 3D ?)
 
@@ -138,8 +134,7 @@ generateSolarSystem = () => {
 draw = () => {
 
   background(backgroundColor);
-  // console.log(hhmmss.getMillis());
-  // console.log("S : " + hhmmss.getS());
+
   // Update the planets position.
   // Do this before updating the camera, as the camera can follow planets.
   // The offset between the camera and the planet can cause stutters
@@ -201,9 +196,10 @@ draw = () => {
       if (hhmmss.getTime() < lastCameraPick) {
         justChangedCamera();
       }
+      
       // Check for end of the world
       if (hhmmss.getTime() - lastEndOfTheWorld > endOfTheWorldFrequency) {
-        endOfTheWorld();
+        startWorldTransition();
       }
       // Check for camera after, as at every round hour, world gets prioritized
       else if (hhmmss.getTime() - lastCameraPick > cameraFrequency) {
@@ -215,7 +211,7 @@ draw = () => {
   // Regular event handling without hhmmss
   else if (!endingTheWorld) {
     if (new Date().getTime() - lastEndOfTheWorld > endOfTheWorldFrequency) {
-      endOfTheWorld();
+      startWorldTransition();
     } else if (new Date().getTime() - lastCameraPick > cameraFrequency) {
       pickACamera();
     }
