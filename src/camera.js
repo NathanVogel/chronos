@@ -59,7 +59,7 @@ getMatchingZoom = (realDistance, screenDistance) => {
 
 
 watchPlanetGoBy = (planet, aniDuration) => {
-  aniDuration = typeof aniDuration !== 'undefined' ? aniDuration : 3000;
+  aniDuration = typeof aniDuration !== 'undefined' ? aniDuration : defaultCameraDuration;
 
   // Follow the star, preserving our camera
   planetToFollow = planet.celestialParent;
@@ -84,7 +84,7 @@ watchPlanetGoBy = (planet, aniDuration) => {
 
 
 followPlanet = (planet, aniDuration) => {
-  aniDuration = typeof aniDuration !== 'undefined' ? aniDuration : 3000;
+  aniDuration = typeof aniDuration !== 'undefined' ? aniDuration : defaultCameraDuration;
   planetToFollow = planet;
   let cameraOffsetX = (Math.random() - 0.5) * width / 8;
   let cameraOffsetY = (Math.random() - 0.5) * height / 8;

@@ -28,8 +28,8 @@ class Planet {
         : this.colors[Math.floor(Math.random() * this.colors.length)]);
     }
 
-    // Atmosphere settings :
-    this.atmosphereSize = Math.random() * 40;
+    // Atmosphere settings : TODO -10
+    this.atmosphereSize = Math.floor(10+Math.random() * 40);
     if (this.atmosphereSize < 3) {
       this.atmosphereSize = 0;
     }
@@ -42,6 +42,7 @@ class Planet {
     // Create the base planet graphic
     if (this.generatePlanet) {
       this.generatePlanet();
+      this.pgAtmosphere = generateAtmosphere(this.radius, this.atmosphereSize, this.atmosphereOpacity);
     }
 
   }

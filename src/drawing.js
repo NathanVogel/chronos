@@ -50,93 +50,32 @@ generateGradientPlanet = function() {
 }
 
 
-
-generateSun = function() {
-  this.pg = createGraphics(planetResolution, planetResolution);
-  this.pg.translate(planetResolution / 2, planetResolution / 2);
-  this.pg.ellipse(CENTER);
-
-
-  let c = getRandomColor();
-  let starCenterColor = color(250, 230, 220);
-  let gScale = 20;
-
-  let w = 1;
-  let m = planetResolution / 2 * (0.2 + 0.5 * Math.random());
-  let o = 55 + 200 * Math.random();
-  let radius = planetResolution / 2 - m;
-  this.sunRatio = radius / planetResolution / 2;
-
-  this.pg.fill(starCenterColor);
-  this.pg.ellipse(0, 0, radius * 2);
-
-  this.pg.strokeWeight(w);
-  this.pg.noFill();
-
-  let insideLuminanceSize = radius * 0.9;
-  let r = 180 + 75 * Math.random();
-  let g = 180 + 75 * Math.random();
-  let b = 180 + 75 * Math.random();
-
+generateAtmosphere = function(realRadius, size, opacity) {;
+  let w = 0.8;
+  let m = size * planetResolution/realRadius;
+  let o = opacity
+  let radius = planetResolution;
+  let graphicWidth = planetResolution + m;
+  let pgA = createGraphics(graphicWidth, graphicWidth);
+  pgA.translate(graphicWidth / 2, graphicWidth / 2);
+  pgA.ellipseMode(CENTER);
+  // Helps again certain artefacts
+  pgA.strokeCap(SQUARE);
+  pgA.strokeWeight(w);
+  pgA.noFill();
+  // Inner atmosphere
+  for (let i = 0; i < radius; i += w) {
+    pgA.stroke(255, 255, 255, pow((1 - i / radius), 4) * o);
+    pgA.ellipse(0, 0, (radius - i));
+  }
+  // Outer atmosphere
   for (let i = 0; i < m; i += w) {
-    this.pg.stroke(r, g, b, pow((o - i * o / m) / (o * 2), 4) * o * 16);
-    this.pg.ellipse(0, 0, radius * 2 + i - 1);
+    pgA.stroke(255, 255, 255, pow((i / m) / 2, 4) * o * 16);
+    pgA.ellipse(0, 0, radius + m - i);
   }
-
-  for (let i = w; i < insideLuminanceSize; i += w) {
-    this.pg.stroke(r, g, b, pow((o - i * o / insideLuminanceSize) / (o * 2), 4) * o * 16);
-    this.pg.ellipse(0, 0, radius * 2 - i - 1);
-  }
+  return pgA;
 }
 
-
-
-drawImageSun = function() {
-  fill(240, 240, 0);
-  //ellipse(0, 0, this.radius * 2, this.radius * 2, 70);
-  imageMode(CENTER);
-  image(img_sun, 0, 0, this.radius * 2, this.radius * 2);
-}
-
-
-
-drawImageJupiter = function() {
-  drawProjectedshadow(this.radius, angleToStar(this));
-  image(img_jupiter, 0, 0, this.radius * 2, this.radius * 2);
-  drawOvershadow(this.radius, angleToStar(this)); //star.satellite.getAngle());
-// fill(10, 100, 240);
-//ellipse(0, 0, this.radius * 2);
-}
-
-
-drawImageMoon = function() {
-
-  drawProjectedshadow(this.radius, angleToStar(this));
-
-  image(img_moon, 0, 0, this.radius * 2, this.radius * 2);
-  drawOvershadow(this.radius, angleToStar(this));
-//fill(150, 150, 150);
-//ellipse(0, 0, this.radius * 2);
-}
-
-
-
-// LINES GRADIENT
-
-drawSun = function() {
-
-  // Draw the planet
-  if (this.pg) {
-    image(this.pg, 0, 0, this.radius * 2, this.radius * 2);
-  } else {
-    let factor = 100 / this.radius;
-    for (let r = 0; r < this.radius; r++) {
-      let o = (this.radius - r);
-      fill(r * factor + 140, r * factor + 120, 0);
-      ellipse(0, 0, o * 2, o * 2);
-    }
-  }
-}
 
 
 
@@ -160,7 +99,12 @@ drawPlanet = function() {
   }
 
   // Draw an atmosphere
-  drawAtmosphere(this.radius, this.atmosphereSize, this.atmosphereOpacity);
+  if (this.pgAtmosphere) {
+    let s =  2 * (this.radius + this.atmosphereSize);
+    image(this.pgAtmosphere, 0, 0, s, s);
+  } else {
+    drawAtmosphere(this.radius, this.atmosphereSize, this.atmosphereOpacity);
+  }
   // Draw a shadow over the planet
   drawOvershadow(this.radius, angleToStar(this));
 
@@ -173,13 +117,60 @@ drawPlanet = function() {
 }
 
 
-drawMoon = function() {
-  drawProjectedshadow(this.radius, angleToStar(this));
-  fill(150, 150, 150);
-  ellipse(0, 0, this.radius * 2);
-  drawOvershadow(this.radius, angleToStar(this));
+
+
+generateSun = function() {
+  this.pg = createGraphics(planetResolution, planetResolution);
+  this.pg.translate(planetResolution / 2, planetResolution / 2);
+  this.pg.ellipse(CENTER);
+
+
+  let c = getRandomColor();
+  let starCenterColor = color(250, 230, 220);
+  let gScale = 20;
+
+  let w = 0.8;
+  let m = planetResolution / 2 * (0.2 + 0.5 * Math.random());
+  let o = 55 + 200 * Math.random();
+  let radius = planetResolution / 2 - m;
+  this.sunRatio = radius / planetResolution / 2;
+
+  this.pg.fill(starCenterColor);
+  this.pg.ellipse(0, 0, radius * 2);
+
+  this.pg.strokeWeight(w);
+  this.pg.strokeCap(SQUARE);
+  this.pg.noFill();
+
+  let insideLuminanceSize = radius * 0.9;
+  let r = 180 + 75 * Math.random();
+  let g = 180 + 75 * Math.random();
+  let b = 180 + 75 * Math.random();
+
+  for (let i = 0; i < m; i += w) {
+    this.pg.stroke(r, g, b, pow((o - i * o / m) / (o * 2), 4) * o * 16);
+    this.pg.ellipse(0, 0, radius * 2 + i - 1);
+  }
+
+  for (let i = w; i < insideLuminanceSize; i += w) {
+    this.pg.stroke(r, g, b, pow((o - i * o / insideLuminanceSize) / (o * 2), 4) * o * 16);
+    this.pg.ellipse(0, 0, radius * 2 - i - 1);
+  }
 }
 
+
+drawSun = function() {
+  if (this.pg) {
+    image(this.pg, 0, 0, this.radius * 2, this.radius * 2);
+  } else {
+    let factor = 100 / this.radius;
+    for (let r = 0; r < this.radius; r++) {
+      let o = (this.radius - r);
+      fill(r * factor + 140, r * factor + 120, 0);
+      ellipse(0, 0, o * 2, o * 2);
+    }
+  }
+}
 
 
 // STANDARD SHADOWS etc.
@@ -224,17 +215,19 @@ drawProjectedshadow = function(radius, angle) {
 }
 
 drawAtmosphere = function(radius, size, opacity) {
-  let w = 0.2;
+  let w = 0.1;
   let m = size;
   let o = opacity;
   strokeWeight(w);
   noFill();
-  for (let i = 0; i < m && i >= 0; i += w) {
-    stroke(255, 255, 255, pow((o - i * o / m) / (o * 2), 4) * o * 16);
-    ellipse(0, 0, radius * 2 - (w > 0 ? +i : -i));
-    // Go back the other way if we reached the top
-    if (i + w >= m) {
-      w = -w;
-    }
+  // Inner atmosphere
+  for (let i = 0; i < radius; i += w) {
+    stroke(255, 255, 255, pow((1 - i / radius), 4) * o * 2);
+    ellipse(0, 0, 2 * (radius - i));
+  }
+  // Outer atmosphere
+  for (let i = 0; i < m; i += w) {
+    stroke(255, 255, 255, pow((i / m) / 2, 4) * o * 16);
+    ellipse(0, 0, radius * 2 + m - i);
   }
 }

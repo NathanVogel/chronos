@@ -1,12 +1,12 @@
 var hhmmss = null;
-hhmmss = new HHMMSS({
-  type: "horizontal",
-  horizontalAlign: "hcenter",
-  verticalAlign: "vcenter",
-  size: "small",
-  invert: true,
-  sleepTime: 1000
-});
+// hhmmss = new HHMMSS({
+//   type: "horizontal",
+//   horizontalAlign: "hcenter",
+//   verticalAlign: "vcenter",
+//   size: "small",
+//   invert: true,
+//   sleepTime: 1000
+// });
 if (hhmmss) {
   hhmmss.getTime = function() {
     return (((hhmmss.getH() * 60 + hhmmss.getM()) * 60) + hhmmss.getS()) * 1000;
@@ -15,13 +15,7 @@ if (hhmmss) {
 
 
 
-
-var img_jupiter,
-  img_sun,
-  img_mars,
-  img_moon,
-  img_shadow,
-  img_mask;
+var defaultCameraDuration = 4000;
 
 // Change camera every 5 minutes.
 var cameraFrequency = 1000 * 60 * 3;
@@ -52,6 +46,8 @@ var maxSystemSpan,
 let planetResolution = 1000;
 let density = 1 / planetResolution;
 var planetMask;
+var img_shadow;
+var img_mask;
 
 
 
@@ -107,8 +103,10 @@ generateSolarSystem = () => {
 
   // Note : better to stay at small size, not sure why anymore (only in 3D ?)
 
-  // The radius contains the halo
-  let starRadius = 300 + Math.random() * 200;
+  // The star radius contains the halo
+  // Would happily do bigger stars, but then the planet would pass
+  // too fast across the screen.
+  let starRadius = 300 + Math.random() * 300;
   let planetRadius = 30 + Math.random() * 50;
   let planetDistance = starRadius + planetRadius + 10 + Math.random() * 240;
   let moonRadius = 6 + Math.random() * 20;
@@ -127,8 +125,6 @@ generateSolarSystem = () => {
   systemSizeX = maxSystemSpan * 5;
   systemSizeY = systemSizeX;
 }
-
-
 
 
 
