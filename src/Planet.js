@@ -3,7 +3,9 @@
 // ====== PLANET ======
 class Planet {
 
-  constructor(generatePlanet, drawPlanet, getAngle, radius, orbitRadius, celestialParent) {
+  constructor(generatePlanet, drawPlanet, getAngle, radius, orbitRadius, celestialParent, planetPG, atmospherePG) {
+    this.pg = typeof planetPG !== 'undefined' ? planetPG : null;
+    this.pgAtmosphere = typeof atmospherePG !== 'undefined' ? atmospherePG : null;
     this.generatePlanet = generatePlanet;
     this.drawPlanet = drawPlanet;
     this.getAngle = getAngle; // The function that depends on the time.
@@ -32,6 +34,7 @@ class Planet {
     this.atmosphereSize = Math.floor(10+Math.random() * 40);
     if (this.atmosphereSize < 3) {
       this.atmosphereSize = 0;
+      this.pgAtmosphere = null;
     }
     this.atmosphereOpacity = 10 + Math.random() * 70;
 
@@ -42,9 +45,10 @@ class Planet {
     // Create the base planet graphic
     if (this.generatePlanet) {
       this.generatePlanet();
-      this.pgAtmosphere = generateAtmosphere(this.radius, this.atmosphereSize, this.atmosphereOpacity);
     }
-
+    if (this.pgAtmosphere) {
+      generateAtmosphere(this.radius, this.atmosphereSize, this.atmosphereOpacity, this.pgAtmosphere)
+    }
   }
 
   updatePosition() {

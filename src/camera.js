@@ -118,17 +118,13 @@ pickACamera = () => {
   // Pick a random planet.
   let planet = star.satellite;
   if (Math.random() < 0.5) {
-    console.log("moon");
     planet = star.satellite.satellite;
   } else {
-    console.log("planet");
   }
   // Pick a random camera function.
   if (Math.random() < 0.5) {
     followPlanet(planet);
-    console.log("follow");
   } else {
-    console.log("watch");
     watchPlanetGoBy(planet);
   }
   justChangedCamera();
@@ -189,7 +185,6 @@ endOfTheWorld = () => {
     delay: alignDuration + 0.2 * crashDuration,
     duration: 22000 * endSpeed,
     complete: function() {
-      console.log("done bigger");
       // Zoom to the core of the star
       currentScale = 10;
       // Switch solar systems
@@ -232,7 +227,10 @@ function keyPressed() {
     pickACamera();
   } else if (key == 'W') {
     startWorldTransition();
-  } else if (key == 'K') {
+  } else if (key == 'A') {
+    generateFractalGradientPlanet()
+  }
+    else if (key == 'K') {
     // Kill HHMMSS
     hhmmss = null;
     // Update the dates to avoid triggering (not the same format)
@@ -261,7 +259,6 @@ mouseWheel = (event) => {
   } else if (event.delta < 0 && currentScale < 100) {
     newScale = currentScale * (zoomStep - event.delta / 100);
   }
-  console.log("new : " + newScale);
   // Zoom to that scale.
   zoomTo(newScale, 300, "easeOutQuad");
   return false;
@@ -270,6 +267,8 @@ mouseWheel = (event) => {
 
 
 mouseDragged = (event) => {
+  // return;
+
   // Don't drag during a move animation
   if (hhmmss || endingTheWorld || moveAnimation) {
     return;

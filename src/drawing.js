@@ -3,7 +3,8 @@
 
 
 generateFractalGradientPlanet = function() {
-  this.pg = createGraphics(planetResolution, planetResolution);
+  this.pg.resetMatrix();
+  this.pg.clear();
   generate(this.pg.drawingContext);
   // Apply our planet mask.
   this.pg.loadPixels();
@@ -15,7 +16,8 @@ generateFractalGradientPlanet = function() {
 
 
 generateGradientPlanet = function() {
-  this.pg = createGraphics(planetResolution, planetResolution);
+  this.pg.resetMatrix();
+  this.pg.clear();
   this.pg.translate(planetResolution / 2, planetResolution / 2);
   // Set the stroke mode, the strokeCap is especially important
   // ROUNDED is much slower to render.
@@ -50,13 +52,20 @@ generateGradientPlanet = function() {
 }
 
 
-generateAtmosphere = function(realRadius, size, opacity) {;
+generateAtmosphere = function(realRadius, atmosphereHeight, opacity, pgA) {;
   let w = 0.8;
-  let m = size * planetResolution/realRadius;
+  let m = atmosphereHeight * planetResolution/realRadius;
   let o = opacity
   let radius = planetResolution;
   let graphicWidth = planetResolution + m;
-  let pgA = createGraphics(graphicWidth, graphicWidth);
+
+  pgA.resetMatrix();
+  pgA.clear();
+  // I used to have a graphic size of planetResolution + m for the atmosphere.
+  // But since it's just a blurry halo, the same as planetResolution is enough.
+  // so this simple scale makes the conversion from what it should be if
+  // it was the same scale as the planet. (can be 2700px +)
+  pgA.scale(planetResolution/graphicWidth)
   pgA.translate(graphicWidth / 2, graphicWidth / 2);
   pgA.ellipseMode(CENTER);
   // Helps again certain artefacts
@@ -107,21 +116,15 @@ drawPlanet = function() {
   }
   // Draw a shadow over the planet
   drawOvershadow(this.radius, angleToStar(this));
-
-  // Quick code to visually check if the ellipse is a perfect circle
-  // stroke(255);
-  // noFill();
-  // strokeWeight(0.2);
-  // ellipse(0, 0, this.radius * 2);
-
 }
 
 
 
 
 generateSun = function() {
-  this.pg = createGraphics(planetResolution, planetResolution);
-  this.pg.translate(planetResolution / 2, planetResolution / 2);
+  this.pg.resetMatrix();
+  this.pg.clear();
+  this.pg.translate(this.pg.width / 2, this.pg.height / 2);
   this.pg.ellipse(CENTER);
 
 
@@ -130,10 +133,10 @@ generateSun = function() {
   let gScale = 20;
 
   let w = 0.8;
-  let m = planetResolution / 2 * (0.2 + 0.5 * Math.random());
+  let m = this.pg.width / 2 * (0.2 + 0.5 * Math.random());
   let o = 55 + 200 * Math.random();
-  let radius = planetResolution / 2 - m;
-  this.sunRatio = radius / planetResolution / 2;
+  let radius = this.pg.width / 2 - m;
+  this.sunRatio = radius / this.pg.width / 2;
 
   this.pg.fill(starCenterColor);
   this.pg.ellipse(0, 0, radius * 2);
@@ -173,6 +176,7 @@ drawSun = function() {
 }
 
 
+
 // STANDARD SHADOWS etc.
 
 drawSatellite = function() {
@@ -190,12 +194,12 @@ drawSatellite = function() {
 drawOvershadow = function(radius, angle) {
   push();
   rotate(angle);
-  // TODO : Check size
   image(img_shadow, 0, 0, radius * 2, radius * 2);
   pop();
 }
 
 
+// Draw the shadow projected by the sun.
 drawProjectedshadow = function(radius, angle) {
   let ratio = star.satellite.orbitRadius / star.radius;
   let alpha = Math.min(0.55, ratio - star.sunRatio);
@@ -214,6 +218,8 @@ drawProjectedshadow = function(radius, angle) {
   pop();
 }
 
+
+// Fallback, previous method for drawing an atmosphere.
 drawAtmosphere = function(radius, size, opacity) {
   let w = 0.1;
   let m = size;

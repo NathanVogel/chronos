@@ -43,11 +43,16 @@ var maxSystemSpan,
   systemSizeX,
   ystemSizeY,
   systemStarCount = 0;
-let planetResolution = 1000;
+let planetResolution = 1024;
 let density = 1 / planetResolution;
 var planetMask;
 var img_shadow;
 var img_mask;
+var pg_star;
+var pg_starSat;
+var pg_starSatAtm;
+var pg_starSatSat;
+var pg_starSatSatAtm;
 
 
 
@@ -62,6 +67,7 @@ function setup() {
 
   // ====== SOLAR SYSTEM =======
 
+  // Planet mask
   planetMask = createGraphics(planetResolution, planetResolution);
   if (planetResolution == 1000) {
     planetMask.image(img_mask, 0, 0);
@@ -75,6 +81,12 @@ function setup() {
   }
   planetMask.loadPixels();
 
+  // p5 Graphics to bake textures
+  pg_star = createGraphics(planetResolution * 2, planetResolution * 2);
+  pg_starSat = createGraphics(planetResolution, planetResolution);
+  pg_starSatSat = createGraphics(planetResolution, planetResolution);
+  pg_starSatAtm = createGraphics(planetResolution, planetResolution);
+  pg_starSatSatAtm = createGraphics(planetResolution, planetResolution);
   generateSolarSystem();
 
 
@@ -100,6 +112,24 @@ function setup() {
 // ======= SOLAR SYSTEM ======
 
 generateSolarSystem = () => {
+  let currentPlanet = star;
+  while (currentPlanet) {
+    // Unsuccessful attempt to clear the memory.
+    let nextPlanet = currentPlanet.satellite;
+    if (currentPlanet.pg) {
+      currentPlanet.pg.remove();
+    }
+    if (currentPlanet.pgAtmosphere) {
+      currentPlanet.pgAtmosphere.remove();
+    }
+    currentPlanet.celestialParent = null;
+    currentPlanet.satellite = null;
+    currentPlanet.pg = null;
+    currentPlanet.pgAtmosphere = null;
+    currentPlanet = nextPlanet;
+  }
+  planetToFollow = null;
+  star = null;
 
   // Note : better to stay at small size, not sure why anymore (only in 3D ?)
 
@@ -112,9 +142,12 @@ generateSolarSystem = () => {
   let moonRadius = 6 + Math.random() * 20;
   let moonDistance = 2 * planetRadius + moonRadius + Math.random() * 60;
   let satelliteDistance = moonRadius + 5 + Math.random() * 20
-  star = new Planet(generateSun, drawSun, getNoAngle, starRadius, 0, null);
-  star.satellite = new Planet(generateFractalGradientPlanet, drawPlanet, getMinutesAngle, planetRadius, planetDistance, star);
-  star.satellite.satellite = new Planet(generateGradientPlanet, drawPlanet, getSecondsAngle, moonRadius, moonDistance, star.satellite);
+  // Make sure the system doesn't touch the star
+  planetDistance = Math.max(planetDistance, starRadius + moonDistance + satelliteDistance + 20);
+  // Create the planets
+  star = new Planet(generateSun, drawSun, getNoAngle, starRadius, 0, null, pg_star, null);
+  star.satellite = new Planet(generateFractalGradientPlanet, drawPlanet, getMinutesAngle, planetRadius, planetDistance, star, pg_starSat, pg_starSatAtm);
+  star.satellite.satellite = new Planet(generateGradientPlanet, drawPlanet, getSecondsAngle, moonRadius, moonDistance, star.satellite, pg_starSatSat, pg_starSatSatAtm);
   star.satellite.satellite.satellite = new Planet(null, drawSatellite, getMillisAngle, 2, satelliteDistance,
     star.satellite.satellite
   );

@@ -5252,7 +5252,7 @@ exports.sizeOf = sizeOf;
 
     function timedOut() {
       self._timedOut = true
-      self.request.abort()      
+      self.request.abort()
     }
 
     function error(resp, msg, t) {
@@ -11833,6 +11833,15 @@ p5.Graphics = function(w, h, renderer, pInst) {
 };
 
 p5.Graphics.prototype = Object.create(p5.Element.prototype);
+
+p5.Graphics.prototype.remove = function() {
+  if (this.elt.parentNode) {
+    this.elt.parentNode.removeChild(this.elt);
+  }
+  for (var elt_ev in this._events) {
+    this.elt.removeEventListener(elt_ev, this._events[elt_ev]);
+  }
+};
 
 module.exports = p5.Graphics;
 
